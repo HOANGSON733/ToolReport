@@ -19,7 +19,8 @@ from google.analytics.data_v1beta.types import (
     Metric,
     RunReportRequest,
 )
-
+import gspread
+from google.oauth2.service_account import Credentials
 # ===================== CONFIG =====================
 st.set_page_config(
     page_title="SEO Rank Dashboard Pro",
@@ -448,10 +449,14 @@ SCOPE = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-creds = ServiceAccountCredentials.from_json_keyfile_name(
-    "credentials.json",
-    SCOPE
+creds = Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=[
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
 )
+
 client = gspread.authorize(creds)
 
 # ===================== HELPERS =====================
