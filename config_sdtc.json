@@ -1,0 +1,19 @@
+{
+  "sheet_id": "1gIIXt6fC9lXR2vRhnrLJxBoIT2pIvgNfPP8Ct96_D6k",
+  "num_pages": 13,
+  "target_domain": "https://drtuananh.com/",
+  "max_threads": 2,
+  "keywords": "chọn Dụng Thần chuẩn\nlinh số cá nhân theo bát cực\nBát Tự Bình An Phù\nThiên thời trong Kinh Dịch\nDự đoán thời vận đại độn\nĐiểm Huyệt Phong Thủy\nCan Chi luận mệnh\nKỳ môn độn giáp dự đoán thịnh suy dòng họ\nÝ nghĩa 64 quẻ Kinh Dịch\nlong mạch phong thủy\nlinh số cá nhân theo bát cực\nBát sát trong âm trạch\nĐiểm Huyệt Phong Thủy",
+  "credentials_file": "credentials.json",
+  "ua_category": "Windows Chrome",
+  "ua_specific": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+  "window_width": 375,
+  "window_height": 667,
+  "headless": false,
+  "delay_seconds": 10,
+  "proxy_enabled": true,
+  "proxy_type": "http",
+  "proxy_list": [
+    "14.224.225.129:45008:aHCtaC:stSDcl"
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "goals": {
+    "Linh phù phong thủy_1769830640.076048": {
+      "keyword": "Linh phù phong thủy",
+      "target": 3,
+      "deadline": "2026-03-02",
+      "created": "2026-01-31T10:37:20.076048"
+    }
+  },
+  "snapshots": {
+    "Snapshot_20260131_1019": {
+      "date": "2026-01-31T10:19:47.857778",
+      "score": 108.3,
+      "note": "",
+      "data": [
+        {
+          "Từ khóa": "Bệnh viện thẩm mỹ Nguyễn Tuấn Anh",
+          "Thứ hạng": 4.0,
+          "Trang": 1.0,
+          "Vị trí": 4.0,
+          "URL": "https://drtuananh.com/",
+          "Tiêu đề": "",
+          "Domain mục tiêu": "Có",
+          "Ngày tìm kiếm": "2026-01-30 15:41:23",
+          "Ngày": "30-01-2026",
+          "Ngày_Sort": "2026-01-30"
+        },
+        {
+          "Từ khóa": "Lịch làm việc thẩm mỹ viện Nguyễn Tuấn Anh",
+          "Thứ hạng": 3.0,
+          "Trang": 1.0,
+          "Vị trí": 3.0,
+          "URL": "https://drtuananh.com/",
+          "Tiêu đề": "",
+          "Domain mục tiêu": "Có",
+          "Ngày tìm kiếm": "2026-01-30 15:42:43",
+          "Ngày": "30-01-2026",
+          "Ngày_Sort": "2026-01-30"
+        },
+        {
+          "Từ khóa": "Cơ sở vật chất thẩm mỹ viện Nguyễn Tuấn Anh",
+          "Thứ hạng": 1.0,
+          "Trang": 1.0,
+          "Vị trí": 1.0,
+          "URL": "https://drtuananh.com/ve-chung-toi",
+          "Tiêu đề": "Về Chúng Tôi | Bác Sĩ Nguyễn Tuấn Anh",
+          "Domain mục tiêu": "Có",
+          "Ngày tìm kiếm": "2026-01-30 15:43:55",
+          "Ngày": "30-01-2026",
+          "Ngày_Sort": "2026-01-30"
+        },
+        {
+          "Từ khóa": "Bác sĩ Nguyễn Tuấn Anh hút mỡ",
+          "Thứ hạng": 5.0,
+          "Trang": 1.0,
+          "Vị trí": 5.0,
+          "URL": "https://drtuananh.com/",
+          "Tiêu đề": "Bác Sĩ Nguyễn Tuấn Anh",
+          "Domain mục tiêu": "Có",
+          "Ngày tìm kiếm": "2026-01-30 15:45:03",
+          "Ngày": "30-01-2026",
+          "Ngày_Sort": "2026-01-30"
+        },
+        {
+          "Từ khóa": "Kinh nghiệm trượt hàm",
+          "Thứ hạng": 1.0,
+          "Trang": 1.0,
+          "Vị trí": 1.0,
+          "URL": "https://drtuananh.com/tin-tuc/lam-dep/ai-nen-lam-truot-ham-nhung-kinh-nghiem-thuc-te-nen-bo-tui-ngay",
+          "Tiêu đề": "Ai nên làm trượt hàm ? Những kinh nghiệm thực tế nên bỏ túi ...",
+          "Domain mục tiêu": "Có",
+          "Ngày tìm kiếm": "2026-01-30 15:46:17",
+          "Ngày": "30-01-2026",
+          "Ngày_Sort": "2026-01-30"
+        },
+        {
+          "Từ khóa": "chi phí gọt hàm trong nước và ngoài nước",
+          "Thứ hạng": NaN,
+          "Trang": NaN,
+          "Vị trí": NaN,
+          "URL": "Không có kết quả",
+          "Tiêu đề": "Không tìm thấy từ khóa này",
+          "Domain mục tiêu": "Không",
+          "Ngày tìm kiếm": "2026-01-30 15:52:10",
+          "Ngày": "30-01-2026",
+          "Ngày_Sort": "2026-01-30"
+        }
+      ]
+    },
+    "Snapshot_20260131_1020": {
+      "date": "2026-01-31T10:20:56.089602",
+      "score": 20.0,
+      "note": "",
+      "data": [
+        {
+          "Từ khóa": "Linh phù phong thủy",
+          "Thứ hạng": 17,
+          "Trang": 2,
+          "Vị trí": 7,
+          "URL": "https://huyenhocviet.com/tin-tuc/phong-thuy/linh-phu-phong-thuy-thu-hut-tai-loc-bao-ve-gia-dao-binh-an",
+          "Tiêu đề": "Linh phù phong thủy thu hút tài lộc bảo vệ gia đạo bình an",
+          "Domain mục tiêu": "Có",
+          "Ngày tìm kiếm": "2026-01-31 09:28:10",
+          "Ngày": "31-01-2026",
+          "Ngày_Sort": "2026-01-31"
+        }
+      ]
+    },
+    "Snapshot_20260131_1021": {
+      "date": "2026-01-31T10:21:50.856757",
+      "score": 20.0,
+      "note": "",
+      "data": [
+        {
+          "Từ khóa": "An toàn dữ liệu web",
+          "Thứ hạng": 11,
+          "Trang": 2,
+          "Vị trí": 1,
+          "URL": "https://sdtc.vn/tin-tuc/an-toan-du-lieu-web-cac-bien-phap-de-bao-ve-khach-truy-cap",
+          "Tiêu đề": "An toàn dữ liệu web – các biện pháp để bảo vệ khách truy ...",
+          "Domain mục tiêu": "Có",
+          "Ngày tìm kiếm": "2026-01-29 11:24:06",
+          "Ngày": "29-01-2026",
+          "Ngày_Sort": "2026-01-29"
+        }
+      ]
+    }
+  },
+  "saved_filters": {},
+  "theme": "light",
+  "notes": {}
+}
