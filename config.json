@@ -1,0 +1,20 @@
+{
+  "sheet_id": "1cuj6slTO1wroK2OkBvd1HdyD_WKXTRmqqoC0bCEmKJE",
+  "num_pages": 15,
+  "target_domain": "https://huyenhocviet.com/",
+  "max_threads": 3,
+  "keywords": "Việt Dịch Chánh Tông trong tư duy nhân sinh\nKỳ môn độn giáp mộ phần dòng họ \nKỳ môn độn giáp trong xây mộ\nKỳ môn độn giáp dự đoán thịnh suy dòng họ\nTam khí trong mộ phần\nChu kỳ biến động qua 384 hào dịch\nVai trò của hào động trong biến dịch\nLuật vận hành hào dịch\nQuy luật tiến thoái trong Kinh Dịch \nĐạo gia Kỳ Môn\nTư duy đạo gia trong kỳ môn\nKỳ môn phong thủy cải vận\nKỳ môn truyền thừa đạo gia\nĐạo gia ứng dụng kỳ môn",
+  "credentials_file": "D:/Salon/GG Sea/credentials.json",
+  "ua_category": "Windows Chrome",
+  "ua_specific": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+  "window_width": 375,
+  "window_height": 672,
+  "headless": false,
+  "delay_seconds": 2,
+  "proxy_enabled": false,
+  "proxy_type": "http",
+  "proxy_host": "160.250.166.28",
+  "proxy_port": "10419",
+  "proxy_username": "",
+  "proxy_password": ""
+}

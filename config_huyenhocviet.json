@@ -1,0 +1,14 @@
+{
+  "sheet_id": "1cuj6slTO1wroK2OkBvd1HdyD_WKXTRmqqoC0bCEmKJE",
+  "num_pages": 10,
+  "target_domain": "https://huyenhocviet.com/",
+  "max_threads": 5,
+  "keywords": "Thiên Can Địa Chi\nxác định mệnh khuyết\nđổi vận theo mùa\ncân bằng ngũ hành trong Tứ Trụ\nTứ Trụ là gì\nCách xem mệnh theo Tứ Trụ\nHoàng Đế Trạch Kinh\nphong thủy dương trạch\nPhong thủy phòng ngủ\nPhong thủy phòng khách\nHậu Thiên Bát Quái\nĐông Tứ Trạch và Tây Tứ Trạch\nTriết lý nhân sinh trong Chu Dịch\nỨng dụng Chu Dịch trong lãnh đạo\nPhương pháp gieo quẻ Chu Dịch",
+  "credentials_file": "credentials.json",
+  "ua_category": "Windows Chrome",
+  "ua_specific": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+  "window_width": 375,
+  "window_height": 667,
+  "headless": false,
+  "delay_seconds": 10
+}

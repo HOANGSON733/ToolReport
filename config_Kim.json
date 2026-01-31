@@ -1,0 +1,14 @@
+{
+  "sheet_id": "1gIIXt6fC9lXR2vRhnrLJxBoIT2pIvgNfPP8Ct96_D6k",
+  "num_pages": 10,
+  "target_domain": "https://drtuananh.com/",
+  "max_threads": 2,
+  "keywords": "Hút mỡ cằm nọng\nSụp mí mắt\nTạo hình rốn\nPhẫu thuật hạ cánh mũi\nĐộn cằm silicone\nPhẫu thuật môi bé\nChỉnh mũi hếch\nTạo dáng mũi L-line\nPhẫu thuật thay túi ngực\nĐộn thái dương\nHạ đường chân tóc\nNâng gò má",
+  "credentials_file": "credentials.json",
+  "ua_category": "Windows Edge",
+  "ua_specific": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+  "window_width": 375,
+  "window_height": 667,
+  "headless": false,
+  "delay_seconds": 5
+}

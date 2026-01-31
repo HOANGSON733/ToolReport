@@ -1,0 +1,14 @@
+{
+  "ua_category": "Windows Chrome",
+  "ua_specific": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+  "window_width": 375,
+  "window_height": 667,
+  "headless": false,
+  "delay_seconds": 10,
+  "sheet_id": "1EIHXRlUZFYvxmXDd31Dn5jcQ0QzwH6sGTllGfuRNX3s",
+  "num_pages": 13,
+  "target_domain": "https://sdtc.vn/",
+  "max_threads": 10,
+  "keywords": "An toàn dữ liệu web \nWebsite đa nền tảng\nBackup website tự động\nHosting SSD cao tốc \nWeb accessibility\nSEO nội dung trang chủ\nXu hướng thiết kế website 2026\nGiao diện website đẹp\nThiết kế website doanh nghiệp\nTemplate website\nCấu trúc website\nTối ưu website",
+  "credentials_file": "credentials.json"
+}
