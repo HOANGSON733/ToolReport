@@ -2058,13 +2058,39 @@ try:
 
         PROPERTY_ID = WEBSITES[selected_website]
 
-        @st.cache_data(ttl=600)
-        def get_analytics_data_ga(property_id, start_date, end_date):
-                try:
-                    credentials = service_account.Credentials.from_service_account_file(
+        # Helper to get credentials for GA API
+        def get_ga_credentials():
+            try:
+                if "gcp_service_account" in st.secrets:
+                    ga_creds_dict = st.secrets["gcp_service_account"]
+                    return service_account.Credentials.from_service_account_info(
+                        ga_creds_dict,
+                        scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                    )
+                else:
+                    return service_account.Credentials.from_service_account_file(
                         "credentials.json",
                         scopes=["https://www.googleapis.com/auth/analytics.readonly"]
                     )
+            except Exception as e:
+                st.error(f"❌ Lỗi tải credentials: {e}")
+                return None
+
+        @st.cache_data(ttl=600)
+        def get_analytics_data_ga(property_id, start_date, end_date, creds_str="default"):
+                try:
+                    # Get credentials from secrets or file
+                    if "gcp_service_account" in st.secrets:
+                        ga_creds_dict = st.secrets["gcp_service_account"]
+                        credentials = service_account.Credentials.from_service_account_info(
+                            ga_creds_dict,
+                            scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                        )
+                    else:
+                        credentials = service_account.Credentials.from_service_account_file(
+                            "credentials.json",
+                            scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                        )
                     client = BetaAnalyticsDataClient(credentials=credentials)
                     request = RunReportRequest(
                         property=f"properties/{property_id}",
@@ -2105,13 +2131,21 @@ try:
                     return None
 
         @st.cache_data(ttl=600)
-        def get_popular_pages_ga(property_id, start_date, end_date):
+        def get_popular_pages_ga(property_id, start_date, end_date, creds_str="default"):
             try:
-                credentials = service_account.Credentials.from_service_account_file(
-                    "credentials.json",
-                    scopes=["https://www.googleapis.com/auth/analytics.readonly"]
-                )
-                client = BetaAnalyticsDataClient(credentials=credentials)
+                # Get credentials from secrets or file
+                if "gcp_service_account" in st.secrets:
+                    ga_creds_dict = st.secrets["gcp_service_account"]
+                    creds = service_account.Credentials.from_service_account_info(
+                        ga_creds_dict,
+                        scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                    )
+                else:
+                    creds = service_account.Credentials.from_service_account_file(
+                        "credentials.json",
+                        scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                    )
+                client = BetaAnalyticsDataClient(credentials=creds)
                 request = RunReportRequest(
                     property=f"properties/{property_id}",
                     date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
