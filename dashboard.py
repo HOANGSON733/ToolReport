@@ -632,17 +632,7 @@ def create_heatmap_calendar(df, year, month):
     return cal, daily_scores
 
 # ===================== SIDEBAR =====================
-with st.sidebar.expander("⚙️ Cấu hình", expanded=False):
-    # Theme switcher
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("☀️ Light", use_container_width=True):
-            st.session_state.theme = 'light'
-            st.rerun()
-    with col2:
-        if st.button("🌙 Dark", use_container_width=True):
-            st.session_state.theme = 'dark'
-            st.rerun()
+# (Settings expander removed per user request)
 
 # Domain selector
 st.sidebar.markdown("**🌐 Domain**")
