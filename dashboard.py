@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 from sheets_config import SHEETS
 from datetime import datetime, timedelta
 import plotly.express as px
@@ -19,7 +18,6 @@ from google.analytics.data_v1beta.types import (
     Metric,
     RunReportRequest,
 )
-import gspread
 from google.oauth2.service_account import Credentials
 from google.oauth2 import service_account
 # ===================== CONFIG =====================
@@ -450,8 +448,19 @@ SCOPE = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-with open('credentials.json', 'r') as f:
-    creds_dict = json.load(f)
+# Try to load credentials from Streamlit secrets first (for Streamlit Cloud)
+# Otherwise fall back to local credentials.json file
+try:
+    if "gcp_service_account" in st.secrets:
+        creds_dict = st.secrets["gcp_service_account"]
+    else:
+        # Fall back to local file
+        with open('credentials.json', 'r') as f:
+            creds_dict = json.load(f)
+except Exception as e:
+    st.error(f"❌ Không thể tải credentials: {e}")
+    st.info("💡 Để sử dụng Streamlit Cloud, thêm [gcp_service_account] vào .streamlit/secrets.toml")
+    st.stop()
 
 creds = Credentials.from_service_account_info(
     creds_dict,
@@ -1999,19 +2008,30 @@ try:
         st.markdown('<p class="section-header">📊 Google Analytics</p>', unsafe_allow_html=True)
 
         # Google Analytics config - Multiple websites
-        credentials = service_account.Credentials.from_service_account_file(
-        "credentials.json",
-        scopes=["https://www.googleapis.com/auth/analytics.readonly"]
-)
+        # Try to load GA credentials from Streamlit secrets first (for Streamlit Cloud)
+        # Otherwise fall back to local credentials.json file
+        try:
+            if "gcp_service_account" in st.secrets:
+                ga_creds_dict = st.secrets["gcp_service_account"]
+                credentials = service_account.Credentials.from_service_account_info(
+                    ga_creds_dict,
+                    scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                )
+            else:
+                credentials = service_account.Credentials.from_service_account_file(
+                    "credentials.json",
+                    scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                )
+        except Exception as e:
+            st.error(f"❌ Không thể tải Google Analytics credentials: {e}")
+            st.info("💡 Để sử dụng Streamlit Cloud, thêm [gcp_service_account] vào Secrets")
+            st.stop()
+        
         WEBSITES = {
             "Website 1 - huyenhocviet.com": "464855282",
             "Website 2 - drtuananh.com": "517078868",
             "Website 3 - sdtc.com": "517020245",
         }
-
-        if not os.path.exists(CREDENTIALS_PATH):
-            st.error(f"⚠️ Không tìm thấy file credentials tại: {CREDENTIALS_PATH}")
-            st.info("Vui lòng đặt file credentials.json vào cùng thư mục với file này")
 
         # Website selector with multi-comparison option
         st.markdown("**🌐 Chọn website để phân tích**")

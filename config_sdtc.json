@@ -9,8 +9,8 @@
   "ua_specific": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
   "window_width": 375,
   "window_height": 667,
-  "headless": false,
-  "delay_seconds": 10,
+  "headless": true,
+  "delay_seconds": 2,
   "proxy_enabled": true,
   "proxy_type": "http",
   "proxy_list": [
