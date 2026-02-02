@@ -694,6 +694,19 @@ domains = list(SHEETS.keys())
 selected_domain = st.sidebar.selectbox("🌐 Domain", domains, label_visibility="collapsed")
 sheet_id = SHEETS[selected_domain]["sheet_id"]
 
+# Theme selector
+st.sidebar.markdown("**🎨 Giao diện**")
+selected_theme = st.sidebar.selectbox(
+    "Chế độ",
+    options=['light', 'dark'],
+    index=0 if st.session_state.theme == 'light' else 1,
+    label_visibility="collapsed"
+)
+if selected_theme != st.session_state.theme:
+    st.session_state.theme = selected_theme
+    save_session_state()
+    st.rerun()
+
 # ===================== LOAD DATA =====================
 @st.cache_data(ttl=3600)  # Cache for 1 hour
 def load_sheet_data_cached(sheet_id, selected_days):
