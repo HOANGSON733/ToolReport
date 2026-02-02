@@ -201,12 +201,12 @@ st.markdown(f"""
     }}
     
     [data-testid="stSidebar"] {{
-        background: linear-gradient(180deg, {current_theme['card_bg']} 0%, {current_theme['bg']} 100%);
-        border-right: 1px solid rgba(0,0,0,0.05);
+        background: linear-gradient(180deg, #1a1f2e 0%, #0f1117 100%);
+        border-right: 2px solid #667eea;
     }}
     
     [data-testid="stSidebar"] h3 {{
-        color: {current_theme['primary']};
+        color: #667eea;
         font-weight: 600;
         margin-top: 1.5rem;
     }}
