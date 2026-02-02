@@ -21,6 +21,7 @@ from google.analytics.data_v1beta.types import (
 )
 import gspread
 from google.oauth2.service_account import Credentials
+from google.oauth2 import service_account
 # ===================== CONFIG =====================
 st.set_page_config(
     page_title="SEO Rank Dashboard Pro",
@@ -449,8 +450,11 @@ SCOPE = [
     "https://www.googleapis.com/auth/drive"
 ]
 
+with open('credentials.json', 'r') as f:
+    creds_dict = json.load(f)
+
 creds = Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"],
+    creds_dict,
     scopes=[
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
@@ -1995,7 +1999,10 @@ try:
         st.markdown('<p class="section-header">📊 Google Analytics</p>', unsafe_allow_html=True)
 
         # Google Analytics config - Multiple websites
-        CREDENTIALS_PATH = "credentials.json"
+        credentials = service_account.Credentials.from_service_account_file(
+        "credentials.json",
+        scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+)
         WEBSITES = {
             "Website 1 - huyenhocviet.com": "464855282",
             "Website 2 - drtuananh.com": "517078868",
@@ -2005,38 +2012,40 @@ try:
         if not os.path.exists(CREDENTIALS_PATH):
             st.error(f"⚠️ Không tìm thấy file credentials tại: {CREDENTIALS_PATH}")
             st.info("Vui lòng đặt file credentials.json vào cùng thư mục với file này")
-        else:
-            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIALS_PATH
-            
-            # Website selector with multi-comparison option
-            st.markdown("**🌐 Chọn website để phân tích**")
-            col1, col2 = st.columns([2, 1])
-            
-            with col1:
-                selected_website = st.selectbox("Website chính", list(WEBSITES.keys()), key="ga_website_select", label_visibility="collapsed")
-            with col2:
-                enable_comparison = st.checkbox("So sánh nhiều")
-            
-            selected_websites = [selected_website]
-            if enable_comparison:
-                other_websites = [w for w in WEBSITES.keys() if w != selected_website]
-                if other_websites:
-                    st.markdown("**🔀 Website so sánh (tối đa 2 website)**")
-                    compare_websites = st.multiselect(
-                        "Chọn website",
-                        other_websites,
-                        max_selections=2,
-                        key="ga_compare_select",
-                        label_visibility="collapsed"
-                    )
-                    selected_websites.extend(compare_websites)
-            
-            PROPERTY_ID = WEBSITES[selected_website]
 
-            @st.cache_data(ttl=600)
-            def get_analytics_data_ga(property_id, start_date, end_date):
+        # Website selector with multi-comparison option
+        st.markdown("**🌐 Chọn website để phân tích**")
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            selected_website = st.selectbox("Website chính", list(WEBSITES.keys()), key="ga_website_select", label_visibility="collapsed")
+        with col2:
+            enable_comparison = st.checkbox("So sánh nhiều")
+
+        selected_websites = [selected_website]
+        if enable_comparison:
+            other_websites = [w for w in WEBSITES.keys() if w != selected_website]
+            if other_websites:
+                st.markdown("**🔀 Website so sánh (tối đa 2 website)**")
+                compare_websites = st.multiselect(
+                    "Chọn website",
+                    other_websites,
+                    max_selections=2,
+                    key="ga_compare_select",
+                    label_visibility="collapsed"
+                )
+                selected_websites.extend(compare_websites)
+
+        PROPERTY_ID = WEBSITES[selected_website]
+
+        @st.cache_data(ttl=600)
+        def get_analytics_data_ga(property_id, start_date, end_date):
                 try:
-                    client = BetaAnalyticsDataClient()
+                    credentials = service_account.Credentials.from_service_account_file(
+                        "credentials.json",
+                        scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                    )
+                    client = BetaAnalyticsDataClient(credentials=credentials)
                     request = RunReportRequest(
                         property=f"properties/{property_id}",
                         date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
@@ -2075,35 +2084,39 @@ try:
                     st.error(f"❌ Lỗi kết nối Google Analytics: {str(e)}")
                     return None
 
-            @st.cache_data(ttl=600)
-            def get_popular_pages_ga(property_id, start_date, end_date):
-                try:
-                    client = BetaAnalyticsDataClient()
-                    request = RunReportRequest(
-                        property=f"properties/{property_id}",
-                        date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
-                        dimensions=[Dimension(name="pagePath"), Dimension(name="pageTitle")],
-                        metrics=[
-                            Metric(name="screenPageViews"),
-                            Metric(name="activeUsers"),
-                            Metric(name="averageSessionDuration"),
-                        ],
-                        limit=10,
-                    )
-                    response = client.run_report(request)
-                    data = []
-                    for row in response.rows:
-                        data.append({
-                            'Đường dẫn': row.dimension_values[0].value,
-                            'Tiêu đề': row.dimension_values[1].value,
-                            'Lượt xem': int(row.metric_values[0].value),
-                            'Người dùng': int(row.metric_values[1].value),
-                            'Thời lượng TB': float(row.metric_values[2].value),
-                        })
-                    return pd.DataFrame(data)
-                except Exception as e:
-                    st.error(f"❌ Lỗi khi lấy trang phổ biến: {str(e)}")
-                    return None
+        @st.cache_data(ttl=600)
+        def get_popular_pages_ga(property_id, start_date, end_date):
+            try:
+                credentials = service_account.Credentials.from_service_account_file(
+                    "credentials.json",
+                    scopes=["https://www.googleapis.com/auth/analytics.readonly"]
+                )
+                client = BetaAnalyticsDataClient(credentials=credentials)
+                request = RunReportRequest(
+                    property=f"properties/{property_id}",
+                    date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
+                    dimensions=[Dimension(name="pagePath"), Dimension(name="pageTitle")],
+                    metrics=[
+                        Metric(name="screenPageViews"),
+                        Metric(name="activeUsers"),
+                        Metric(name="averageSessionDuration"),
+                    ],
+                    limit=10,
+                )
+                response = client.run_report(request)
+                data = []
+                for row in response.rows:
+                    data.append({
+                        'Đường dẫn': row.dimension_values[0].value,
+                        'Tiêu đề': row.dimension_values[1].value,
+                        'Lượt xem': int(row.metric_values[0].value),
+                        'Người dùng': int(row.metric_values[1].value),
+                        'Thời lượng TB': float(row.metric_values[2].value),
+                    })
+                return pd.DataFrame(data)
+            except Exception as e:
+                st.error(f"❌ Lỗi khi lấy trang phổ biến: {str(e)}")
+                return None
 
             # Date inputs
             col1, col2 = st.columns(2)
