@@ -2138,126 +2138,126 @@ try:
                 st.error(f"❌ Lỗi khi lấy trang phổ biến: {str(e)}")
                 return None
 
-            # Date inputs
-            col1, col2 = st.columns(2)
-            with col1:
-                ga_start = st.date_input("Google Analytics - Từ ngày", datetime.now() - timedelta(days=30), key="ga_start_date")
-            with col2:
-                ga_end = st.date_input("Google Analytics - Đến ngày", datetime.now(), key="ga_end_date")
+        # Date inputs
+        col1, col2 = st.columns(2)
+        with col1:
+            ga_start = st.date_input("Google Analytics - Từ ngày", datetime.now() - timedelta(days=30), key="ga_start_date")
+        with col2:
+            ga_end = st.date_input("Google Analytics - Đến ngày", datetime.now(), key="ga_end_date")
 
-            # Button below
-            load_ga = st.button("🔄 Tải dữ liệu Google Analytics", key="load_ga")
+        # Button below
+        load_ga = st.button("🔄 Tải dữ liệu Google Analytics", key="load_ga")
 
-            # Store current date range and website in session_state to track changes
-            current_date_range = f"{selected_website}_{ga_start.strftime('%Y-%m-%d')}_{ga_end.strftime('%Y-%m-%d')}"
-            if 'ga_current_range' not in st.session_state:
-                st.session_state['ga_current_range'] = None
+        # Store current date range and website in session_state to track changes
+        current_date_range = f"{selected_website}_{ga_start.strftime('%Y-%m-%d')}_{ga_end.strftime('%Y-%m-%d')}"
+        if 'ga_current_range' not in st.session_state:
+            st.session_state['ga_current_range'] = None
 
-            # Load data if button pressed OR if date range changed OR if data doesn't exist
-            should_load = load_ga or (st.session_state.get('ga_current_range') != current_date_range) or ('ga_data' not in st.session_state)
+        # Load data if button pressed OR if date range changed OR if data doesn't exist
+        should_load = load_ga or (st.session_state.get('ga_current_range') != current_date_range) or ('ga_data' not in st.session_state)
 
-            if should_load:
-                with st.spinner("⏳ Đang tải dữ liệu từ Google Analytics..."):
-                    # Clear cache for these functions to force fresh API call
-                    get_analytics_data_ga.clear()
-                    get_popular_pages_ga.clear()
-                    
-                    df_ga = get_analytics_data_ga(PROPERTY_ID, ga_start.strftime("%Y-%m-%d"), ga_end.strftime("%Y-%m-%d"))
-                    pages_ga = get_popular_pages_ga(PROPERTY_ID, ga_start.strftime("%Y-%m-%d"), ga_end.strftime("%Y-%m-%d"))
-
-                    if df_ga is not None and not df_ga.empty:
-                        st.session_state['ga_data'] = df_ga
-                        st.session_state['ga_pages'] = pages_ga
-                        st.session_state['ga_current_range'] = current_date_range
-                        st.success("✅ Tải dữ liệu Google Analytics thành công!")
-                    else:
-                        st.error("❌ Không thể tải dữ liệu Google Analytics. Vui lòng kiểm tra Property ID và quyền truy cập.")
-
-            if 'ga_data' in st.session_state:
-                ga_df = st.session_state['ga_data']
-
-                # Overview metrics
-                st.markdown('<p class="section-header">📈 Tổng quan Google Analytics</p>', unsafe_allow_html=True)
-                col1, col2, col3, col4, col5 = st.columns(5)
+        if should_load:
+            with st.spinner("⏳ Đang tải dữ liệu từ Google Analytics..."):
+                # Clear cache for these functions to force fresh API call
+                get_analytics_data_ga.clear()
+                get_popular_pages_ga.clear()
                 
-                with col1:
-                    st.metric("👥 Người dùng", f"{ga_df['Người dùng'].sum():,}")
-                with col2:
-                    st.metric("🔄 Phiên", f"{ga_df['Phiên'].sum():,}")
-                with col3:
-                    st.metric("📄 Lượt xem", f"{ga_df['Lượt xem'].sum():,}")
-                with col4:
-                    avg_duration = ga_df['Thời lượng TB'].mean()
-                    st.metric("⏱️ Thời lượng TB (s)", f"{avg_duration:.1f}")
-                with col5:
-                    avg_bounce = ga_df['Tỷ lệ thoát'].mean()
-                    st.metric("⚡ Tỷ lệ thoát TB", f"{avg_bounce:.1%}")
+                df_ga = get_analytics_data_ga(PROPERTY_ID, ga_start.strftime("%Y-%m-%d"), ga_end.strftime("%Y-%m-%d"))
+                pages_ga = get_popular_pages_ga(PROPERTY_ID, ga_start.strftime("%Y-%m-%d"), ga_end.strftime("%Y-%m-%d"))
 
-                st.markdown("---")
-
-                if enable_comparison and len(selected_websites) > 1:
-                    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["📊 Biểu đồ", "🌍 Quốc gia", "🏙️ Thành phố", "📱 Thiết bị", "🔥 Top trang", "📋 Dữ liệu", "⚖️ So sánh Website"])
+                if df_ga is not None and not df_ga.empty:
+                    st.session_state['ga_data'] = df_ga
+                    st.session_state['ga_pages'] = pages_ga
+                    st.session_state['ga_current_range'] = current_date_range
+                    st.success("✅ Tải dữ liệu Google Analytics thành công!")
                 else:
-                    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Biểu đồ", "🌍 Quốc gia", "🏙️ Thành phố", "📱 Thiết bị", "🔥 Top trang", "📋 Dữ liệu"])
-                    tab7 = None
+                    st.error("❌ Không thể tải dữ liệu Google Analytics. Vui lòng kiểm tra Property ID và quyền truy cập.")
 
-                with tab1:
-                    # Người dùng theo ngày
-                    col_a, col_b = st.columns(2)
-                    
-                    with col_a:
-                        st.subheader("📈 Người dùng theo ngày")
-                        daily_users = ga_df.groupby('Ngày')['Người dùng'].sum().reset_index()
-                        daily_users['Ngày'] = pd.to_datetime(daily_users['Ngày'], format='%Y%m%d')
-                        daily_users = daily_users.sort_values('Ngày')
-                        fig1 = px.line(daily_users, x='Ngày', y='Người dùng', markers=True, color_discrete_sequence=['#667eea'])
-                        fig1.update_layout(height=350, hovermode='x unified', plot_bgcolor='rgba(0,0,0,0)')
-                        st.plotly_chart(fig1, use_container_width=True)
-                    
-                    with col_b:
-                        st.subheader("📊 Phiên theo ngày")
-                        daily_sessions = ga_df.groupby('Ngày')['Phiên'].sum().reset_index()
-                        daily_sessions['Ngày'] = pd.to_datetime(daily_sessions['Ngày'], format='%Y%m%d')
-                        daily_sessions = daily_sessions.sort_values('Ngày')
-                        fig2 = px.bar(daily_sessions, x='Ngày', y='Phiên', color='Phiên', color_continuous_scale='Viridis')
-                        fig2.update_layout(height=350, hovermode='x unified', plot_bgcolor='rgba(0,0,0,0)', showlegend=False)
-                        st.plotly_chart(fig2, use_container_width=True)
+        if 'ga_data' in st.session_state:
+            ga_df = st.session_state['ga_data']
 
-                    # Source breakdown
-                    col_c, col_d = st.columns(2)
-                    
-                    with col_c:
-                        st.subheader("🔗 Top Nguồn truy cập")
-                        source_data = ga_df.groupby('Nguồn')['Phiên'].sum().nlargest(8).reset_index()
-                        fig3 = px.bar(source_data, x='Phiên', y='Nguồn', orientation='h', color='Phiên', color_continuous_scale='Blues')
-                        fig3.update_layout(height=350, showlegend=False, plot_bgcolor='rgba(0,0,0,0)')
-                        st.plotly_chart(fig3, use_container_width=True)
-                    
-                    with col_d:
-                        st.subheader("📋 Top Quốc gia")
-                        country_data = ga_df.groupby('Quốc gia')['Người dùng'].sum().nlargest(10).reset_index()
-                        fig4 = px.bar(country_data, x='Người dùng', y='Quốc gia', orientation='h', color='Người dùng', color_continuous_scale='Greens')
-                        fig4.update_layout(height=350, showlegend=False, plot_bgcolor='rgba(0,0,0,0)')
-                        st.plotly_chart(fig4, use_container_width=True)
+            # Overview metrics
+            st.markdown('<p class="section-header">📈 Tổng quan Google Analytics</p>', unsafe_allow_html=True)
+            col1, col2, col3, col4, col5 = st.columns(5)
+            
+            with col1:
+                st.metric("👥 Người dùng", f"{ga_df['Người dùng'].sum():,}")
+            with col2:
+                st.metric("🔄 Phiên", f"{ga_df['Phiên'].sum():,}")
+            with col3:
+                st.metric("📄 Lượt xem", f"{ga_df['Lượt xem'].sum():,}")
+            with col4:
+                avg_duration = ga_df['Thời lượng TB'].mean()
+                st.metric("⏱️ Thời lượng TB (s)", f"{avg_duration:.1f}")
+            with col5:
+                avg_bounce = ga_df['Tỷ lệ thoát'].mean()
+                st.metric("⚡ Tỷ lệ thoát TB", f"{avg_bounce:.1%}")
 
-                with tab2:
-                    st.subheader("🌍 Phân tích theo Quốc gia")
-                    country_detail = ga_df.groupby('Quốc gia').agg({
-                        'Người dùng': 'sum',
-                        'Phiên': 'sum',
-                        'Lượt xem': 'sum',
-                        'Thời lượng TB': 'mean',
-                        'Tỷ lệ thoát': 'mean'
-                    }).reset_index().sort_values('Người dùng', ascending=False)
-                    
-                    col_x, col_y = st.columns(2)
-                    with col_x:
-                        fig_country = px.pie(country_detail.head(10), values='Người dùng', names='Quốc gia', hole=0.4)
-                        fig_country.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20))
-                        st.plotly_chart(fig_country, use_container_width=True)
-                    
-                    with col_y:
-                        st.dataframe(country_detail[['Quốc gia', 'Người dùng', 'Phiên', 'Lượt xem']].head(15), use_container_width=True)
+            st.markdown("---")
+
+            if enable_comparison and len(selected_websites) > 1:
+                tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["📊 Biểu đồ", "🌍 Quốc gia", "🏙️ Thành phố", "📱 Thiết bị", "🔥 Top trang", "📋 Dữ liệu", "⚖️ So sánh Website"])
+            else:
+                tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Biểu đồ", "🌍 Quốc gia", "🏙️ Thành phố", "📱 Thiết bị", "🔥 Top trang", "📋 Dữ liệu"])
+                tab7 = None
+
+            with tab1:
+                # Người dùng theo ngày
+                col_a, col_b = st.columns(2)
+                
+                with col_a:
+                    st.subheader("📈 Người dùng theo ngày")
+                    daily_users = ga_df.groupby('Ngày')['Người dùng'].sum().reset_index()
+                    daily_users['Ngày'] = pd.to_datetime(daily_users['Ngày'], format='%Y%m%d')
+                    daily_users = daily_users.sort_values('Ngày')
+                    fig1 = px.line(daily_users, x='Ngày', y='Người dùng', markers=True, color_discrete_sequence=['#667eea'])
+                    fig1.update_layout(height=350, hovermode='x unified', plot_bgcolor='rgba(0,0,0,0)')
+                    st.plotly_chart(fig1, use_container_width=True)
+                
+                with col_b:
+                    st.subheader("📊 Phiên theo ngày")
+                    daily_sessions = ga_df.groupby('Ngày')['Phiên'].sum().reset_index()
+                    daily_sessions['Ngày'] = pd.to_datetime(daily_sessions['Ngày'], format='%Y%m%d')
+                    daily_sessions = daily_sessions.sort_values('Ngày')
+                    fig2 = px.bar(daily_sessions, x='Ngày', y='Phiên', color='Phiên', color_continuous_scale='Viridis')
+                    fig2.update_layout(height=350, hovermode='x unified', plot_bgcolor='rgba(0,0,0,0)', showlegend=False)
+                    st.plotly_chart(fig2, use_container_width=True)
+
+                # Source breakdown
+                col_c, col_d = st.columns(2)
+                
+                with col_c:
+                    st.subheader("🔗 Top Nguồn truy cập")
+                    source_data = ga_df.groupby('Nguồn')['Phiên'].sum().nlargest(8).reset_index()
+                    fig3 = px.bar(source_data, x='Phiên', y='Nguồn', orientation='h', color='Phiên', color_continuous_scale='Blues')
+                    fig3.update_layout(height=350, showlegend=False, plot_bgcolor='rgba(0,0,0,0)')
+                    st.plotly_chart(fig3, use_container_width=True)
+                
+                with col_d:
+                    st.subheader("📋 Top Quốc gia")
+                    country_data = ga_df.groupby('Quốc gia')['Người dùng'].sum().nlargest(10).reset_index()
+                    fig4 = px.bar(country_data, x='Người dùng', y='Quốc gia', orientation='h', color='Người dùng', color_continuous_scale='Greens')
+                    fig4.update_layout(height=350, showlegend=False, plot_bgcolor='rgba(0,0,0,0)')
+                    st.plotly_chart(fig4, use_container_width=True)
+
+            with tab2:
+                st.subheader("🌍 Phân tích theo Quốc gia")
+                country_detail = ga_df.groupby('Quốc gia').agg({
+                    'Người dùng': 'sum',
+                    'Phiên': 'sum',
+                    'Lượt xem': 'sum',
+                    'Thời lượng TB': 'mean',
+                    'Tỷ lệ thoát': 'mean'
+                }).reset_index().sort_values('Người dùng', ascending=False)
+                
+                col_x, col_y = st.columns(2)
+                with col_x:
+                    fig_country = px.pie(country_detail.head(10), values='Người dùng', names='Quốc gia', hole=0.4)
+                    fig_country.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20))
+                    st.plotly_chart(fig_country, use_container_width=True)
+                
+                with col_y:
+                    st.dataframe(country_detail[['Quốc gia', 'Người dùng', 'Phiên', 'Lượt xem']].head(15), use_container_width=True)
 
                 with tab4:
                     st.subheader("📱 Phân tích theo Thiết bị")
