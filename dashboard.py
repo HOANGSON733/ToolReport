@@ -201,14 +201,40 @@ st.markdown(f"""
     }}
     
     [data-testid="stSidebar"] {{
-        background: linear-gradient(180deg, #1a1f2e 0%, #0f1117 100%);
-        border-right: 2px solid #667eea;
+        background: linear-gradient(180deg, {current_theme['card_bg']} 0%, {current_theme['bg']} 100%);
+        border-right: 2px solid {current_theme['primary']};
     }}
     
     [data-testid="stSidebar"] h3 {{
-        color: #667eea;
+        color: {current_theme['primary']};
         font-weight: 600;
         margin-top: 1.5rem;
+    }}
+    
+    [data-testid="stSidebar"] p {{
+        color: {current_theme['text']};
+    }}
+    
+    [data-testid="stSidebar"] label {{
+        color: {current_theme['text']};
+    }}
+    
+    [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div > input {{
+        background-color: {current_theme['card_bg']};
+        color: {current_theme['text']};
+        border: 1px solid {current_theme['primary']};
+    }}
+    
+    [data-testid="stSidebar"] [data-testid="stDateInput"] > div > div > input {{
+        background-color: {current_theme['card_bg']};
+        color: {current_theme['text']};
+        border: 1px solid {current_theme['primary']};
+    }}
+    
+    [data-testid="stSidebar"] [data-testid="stTextInput"] > div > div > input {{
+        background-color: {current_theme['card_bg']};
+        color: {current_theme['text']};
+        border: 1px solid {current_theme['primary']};
     }}
     
     .section-header {{
@@ -314,11 +340,18 @@ st.markdown(f"""
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input,
     .stDateInput > div > div > input {{
-        border: 1px solid rgba(0,0,0,0.1);
+        border: 1px solid {current_theme['primary']} !important;
         border-radius: 8px;
         padding: 0.75rem;
-        background: {current_theme['card_bg']};
-        color: {current_theme['text']};
+        background: {current_theme['card_bg']} !important;
+        color: {current_theme['text']} !important;
+    }}
+    
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus,
+    .stDateInput > div > div > input:focus {{
+        border-color: {current_theme['primary']} !important;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
     }}
     
     /* Selectbox & Multiselect */
@@ -329,9 +362,30 @@ st.markdown(f"""
     
     .stSelectbox [data-baseweb="select"] > div,
     .stMultiSelect [data-baseweb="base-input"] {{
-        border: 1px solid rgba(0,0,0,0.1);
+        border: 1px solid {current_theme['primary']} !important;
         border-radius: 8px;
-        background: {current_theme['card_bg']};
+        background: {current_theme['card_bg']} !important;
+        color: {current_theme['text']} !important;
+    }}
+    
+    .stSelectbox [data-baseweb="select"] > div > div,
+    .stMultiSelect [data-baseweb="base-input"] input {{
+        color: {current_theme['text']} !important;
+    }}
+    
+    /* Selectbox dropdown */
+    [role="listbox"] {{
+        background: {current_theme['card_bg']} !important;
+        border: 1px solid {current_theme['primary']} !important;
+    }}
+    
+    [role="option"] {{
+        color: {current_theme['text']} !important;
+    }}
+    
+    [role="option"]:hover {{
+        background: {current_theme['primary']} !important;
+        color: {current_theme['bg']} !important;
     }}
     
     /* Expander */
