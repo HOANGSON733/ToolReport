@@ -153,7 +153,7 @@ if 'snapshots' not in st.session_state:
 if 'saved_filters' not in st.session_state:
     st.session_state.saved_filters = saved_session.get('saved_filters', {})
 if 'theme' not in st.session_state:
-    st.session_state.theme = saved_session.get('theme', 'light')
+    st.session_state.theme = saved_session.get('theme', 'dark')
 if 'notes' not in st.session_state:
     st.session_state.notes = saved_session.get('notes', {})
 
