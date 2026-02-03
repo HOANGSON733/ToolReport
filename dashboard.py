@@ -582,25 +582,39 @@ def extract_keyword_groups(keywords):
     return filtered_groups
 
 def calculate_seo_score(df):
+    """
+    Tính SEO Performance Score (0-100)
+    - Top 3: 10 điểm
+    - Top 10: 5 điểm
+    - Top 20: 2 điểm
+    - Không rank: 0.5 điểm
+    - Max: 100 điểm (khi tất cả từ khóa trong Top 3)
+    """
     if df.empty:
         return 0
     
     total = len(df)
     top3 = (df["Thứ hạng"] <= 3).sum()
-    top10 = (df["Thứ hạng"] <= 10).sum()
-    top20 = (df["Thứ hạng"] <= 20).sum()
+    top10 = ((df["Thứ hạng"] > 3) & (df["Thứ hạng"] <= 10)).sum()
+    top20 = ((df["Thứ hạng"] > 10) & (df["Thứ hạng"] <= 20)).sum()
     no_rank = df["Thứ hạng"].isna().sum()
+    outside_top20 = total - top3 - top10 - top20 - no_rank
     
     score = (
         (top3 * 10) +
         (top10 * 5) +
         (top20 * 2) +
-        ((total - no_rank - top20) * 0.5)
+        (outside_top20 * 0.5) +
+        (no_rank * 0)
     )
     
+    # Max score = all keywords in Top 3
     max_score = total * 10
     
-    return round((score / max_score * 100), 1) if max_score > 0 else 0
+    # Normalize to 0-100
+    final_score = (score / max_score * 100) if max_score > 0 else 0
+    
+    return round(min(final_score, 100), 1)
 
 def forecast_rank(kw_data, days_ahead=7):
     """Dự báo thứ hạng sử dụng linear regression"""
