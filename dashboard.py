@@ -153,7 +153,7 @@ if 'snapshots' not in st.session_state:
 if 'saved_filters' not in st.session_state:
     st.session_state.saved_filters = saved_session.get('saved_filters', {})
 if 'theme' not in st.session_state:
-    st.session_state.theme = saved_session.get('theme', 'dark')
+    st.session_state.theme = saved_session.get('theme', 'dark').lower()
 if 'notes' not in st.session_state:
     st.session_state.notes = saved_session.get('notes', {})
 
@@ -757,8 +757,9 @@ def load_sheet_data_cached(sheet_id, selected_days):
         df = pd.concat(all_data, ignore_index=True)
 
         # Normalize columns
+
         expected_columns = [
-            "Từ khóa", "Thứ hạng", "Trang", "Vị trí", "URL",
+            "Từ khóa", "Trang", "Vị trí", "Thứ hạng", "URL",
             "Tiêu đề", "Domain mục tiêu", "Ngày tìm kiếm", "Ngày", "Ngày_Sort"
         ]
 
@@ -2317,7 +2318,7 @@ try:
                     daily_users = daily_users.sort_values('Ngày')
                     fig1 = px.line(daily_users, x='Ngày', y='Người dùng', markers=True, color_discrete_sequence=['#667eea'])
                     fig1.update_layout(height=350, hovermode='x unified', plot_bgcolor='rgba(0,0,0,0)')
-                    st.plotly_chart(fig1, use_container_width=True)
+                    st.plotly_chart(fig1, width='stretch')
                 
                 with col_b:
                     st.subheader("📊 Phiên theo ngày")
@@ -2718,8 +2719,18 @@ try:
     
     st.markdown(f"**Hiển thị {len(filtered):,} từ khóa**")
     
+    # Sắp xếp lại thứ tự cột theo yêu cầu
+    column_order = [
+        "Từ khóa", "Trang", "Vị trí", "Thứ hạng", "URL",
+        "Tiêu đề", "Domain mục tiêu", "Ngày tìm kiếm", "Ngày"
+    ]
+    
+    # Chỉ giữ lại các cột tồn tại và theo thứ tự mong muốn
+    display_columns = [col for col in column_order if col in filtered.columns]
+    filtered_display = filtered[display_columns]
+    
     st.dataframe(
-        filtered.drop(columns=["Ngày_Sort"], errors="ignore"),
+        filtered_display.drop(columns=["Ngày_Sort"], errors="ignore"),
         width='stretch',
         height=600,
         column_config={

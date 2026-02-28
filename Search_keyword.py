@@ -33,10 +33,306 @@ import traceback
 import webbrowser
 from login import LoginDialog
 import threading
+import logging
+from pathlib import Path
 
 # Global variables for slot-based window positioning
 window_slots = []  # List of dicts: {'x': int, 'y': int, 'occupied': bool}
 slot_lock = threading.Lock()  # Thread-safe access to slots
+
+# Global variables for slot-based window positioning
+window_slots = []  # List of dicts: {'x': int, 'y': int, 'occupied': bool}
+slot_lock = threading.Lock()  # Thread-safe access to slots
+
+# Constants
+DEFAULT_WINDOW_SIZE = (600, 800)
+DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+def get_resource_path(relative_path: str, external: bool = False) -> str:
+    """Get the absolute path to a resource, handling both development and packaged environments."""
+    if getattr(sys, "frozen", False):
+        base_path = sys.executable if external else sys._MEIPASS
+    else:
+        base_path = Path(__file__).parent.parent
+
+    return str(Path(base_path) / relative_path)
+
+def setup_chrome_options(
+    extension_path: str = None,
+    chrome_exe_path: str = None,
+    headless: bool = False,
+    window_size: tuple = DEFAULT_WINDOW_SIZE,
+    window_position: tuple = (0, 0),
+    user_agent: str = None,
+    profile_path: str = None
+) -> webdriver.ChromeOptions:
+    """Set up Chrome options for the driver."""
+    options = webdriver.ChromeOptions()
+
+    # Add extension if provided
+    if extension_path and Path(extension_path).exists():
+        options.add_argument(f"--load-extension={extension_path}")
+        options.add_argument(f"--disable-extensions-except={extension_path}")
+
+    # Set binary location if provided
+    if chrome_exe_path and Path(chrome_exe_path).exists():
+        options.binary_location = chrome_exe_path
+
+    # Window settings
+    options.add_argument(f"--window-size={window_size[0]},{window_size[1]}")
+    options.add_argument(f"--window-position={window_position[0]},{window_position[1]}")
+    options.add_argument("--force-device-scale-factor=1")
+
+    # Other arguments
+    options.add_argument("--lang=vi-VN,en-US,en")
+    options.add_argument("--disable-notifications")
+    options.add_argument("--no-first-run")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+
+    if user_agent:
+        options.add_argument(f"--user-agent={user_agent}")
+    if headless:
+        options.add_argument("--headless=new")
+    if profile_path:
+        options.add_argument(f"--user-data-dir={profile_path}")
+
+    return options
+
+def create_chrome_driver(
+    proxy: str = None,
+    headless_mode: bool = False,
+    window_position: tuple = (0, 0),
+    user_agent: str = None,
+    width: int = 600,
+    height: int = 800,
+    thread_name: str = None,
+) -> webdriver.Chrome:
+    """Create and configure a Chrome WebDriver instance.
+
+    Args:
+        proxy: Proxy server address (not implemented yet)
+        headless_mode: Run browser in headless mode
+        window_position: Tuple of (x, y) coordinates for window position
+        user_agent: Custom user agent string
+        width: Browser window width
+        height: Browser window height
+        thread_name: Name of the thread for profile isolation
+
+    Returns:
+        Configured Chrome WebDriver instance or None if initialization fails
+    """
+    if not thread_name:
+        thread_name = threading.current_thread().name
+
+    # Validate parameters
+    if width <= 0 or height <= 0:
+        logging.error(f"Thread {thread_name} - Invalid window dimensions: {width}x{height}")
+        return None
+
+    try:
+        # Setup paths
+        extension_path = r"D:\Salon\GG Sea\RektCaptcha_Extension"
+        chrome_exe_path = r"D:\Salon\GG Sea\chrome-win64\chrome.exe"
+        driver_path = get_resource_path("tools/chromedriver.exe", external=True)
+
+        # Create profile path - new profile each run
+        app_data_path = os.getenv("LOCALAPPDATA", Path.home())
+        profile_path = Path(app_data_path) / "TSEO_Profiles" / f"Profile_{thread_name}_{int(time.time())}"
+        profile_path.mkdir(parents=True, exist_ok=True)
+
+        # Setup options
+        options = setup_chrome_options(
+            extension_path=extension_path,
+            chrome_exe_path=chrome_exe_path,
+            headless=headless_mode,
+            window_size=(width, height),
+            window_position=window_position,
+            user_agent=user_agent or DEFAULT_USER_AGENT,
+            profile_path=str(profile_path)
+        )
+
+        # Initialize driver
+        try:
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+        except Exception:
+            # Fallback to default if ChromeDriverManager fails
+            driver = webdriver.Chrome(options=options)
+
+        # Set window properties
+        if not headless_mode:
+            try:
+                driver.set_window_rect(x=window_position[0], y=window_position[1], width=width, height=height)
+            except Exception as e:
+                logging.warning(f"Thread {thread_name} - Could not set window rect: {e}")
+                try:
+                    driver.set_window_size(width, height)
+                    driver.set_window_position(*window_position)
+                except Exception as e2:
+                    logging.warning(f"Thread {thread_name} - Could not set window size/position: {e2}")
+
+        # Custom quit method
+        original_quit = driver.quit
+        def custom_quit():
+            logging.info(f"Thread {thread_name} - Closing driver...")
+            try:
+                original_quit()
+            except Exception as e:
+                logging.error(f"Thread {thread_name} - Error during driver quit: {e}")
+        driver.quit = custom_quit
+
+        logging.info(f"Thread {thread_name} - Chrome driver initialized successfully")
+        return driver
+
+    except Exception as e:
+        logging.error(f"Thread {thread_name} - Failed to initialize Chrome driver: {e}")
+        return None
+
+# Constants
+DEFAULT_WINDOW_SIZE = (600, 800)
+DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+def get_resource_path(relative_path: str, external: bool = False) -> str:
+    """Get the absolute path to a resource, handling both development and packaged environments."""
+    if getattr(sys, "frozen", False):
+        base_path = sys.executable if external else sys._MEIPASS
+    else:
+        base_path = Path(__file__).parent.parent
+
+    return str(Path(base_path) / relative_path)
+
+def setup_chrome_options(
+    extension_path: str = None,
+    chrome_exe_path: str = None,
+    headless: bool = False,
+    window_size: tuple = DEFAULT_WINDOW_SIZE,
+    window_position: tuple = (0, 0),
+    user_agent: str = None,
+    profile_path: str = None
+) -> webdriver.ChromeOptions:
+    """Set up Chrome options for the driver."""
+    options = webdriver.ChromeOptions()
+
+    # Add extension if provided
+    if extension_path and Path(extension_path).exists():
+        options.add_argument(f"--load-extension={extension_path}")
+        options.add_argument(f"--disable-extensions-except={extension_path}")
+
+    # Set binary location if provided
+    if chrome_exe_path and Path(chrome_exe_path).exists():
+        options.binary_location = chrome_exe_path
+
+    # Window settings
+    options.add_argument(f"--window-size={window_size[0]},{window_size[1]}")
+    options.add_argument(f"--window-position={window_position[0]},{window_position[1]}")
+    options.add_argument("--force-device-scale-factor=1")
+
+    # Other arguments
+    options.add_argument("--lang=vi-VN,en-US,en")
+    options.add_argument("--disable-notifications")
+    options.add_argument("--no-first-run")
+    options.add_argument("--disable-infobars")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+
+    if user_agent:
+        options.add_argument(f"--user-agent={user_agent}")
+    if headless:
+        options.add_argument("--headless=new")
+    if profile_path:
+        options.add_argument(f"--user-data-dir={profile_path}")
+
+    return options
+
+def create_chrome_driver(
+    proxy: str = None,
+    headless_mode: bool = False,
+    window_position: tuple = (0, 0),
+    user_agent: str = None,
+    width: int = 600,
+    height: int = 800,
+    thread_name: str = None,
+) -> webdriver.Chrome:
+    """Create and configure a Chrome WebDriver instance.
+
+    Args:
+        proxy: Proxy server address (not implemented yet)
+        headless_mode: Run browser in headless mode
+        window_position: Tuple of (x, y) coordinates for window position
+        user_agent: Custom user agent string
+        width: Browser window width
+        height: Browser window height
+        thread_name: Name of the thread for profile isolation
+
+    Returns:
+        Configured Chrome WebDriver instance or None if initialization fails
+    """
+    if not thread_name:
+        thread_name = threading.current_thread().name
+
+    # Validate parameters
+    if width <= 0 or height <= 0:
+        logging.error(f"Thread {thread_name} - Invalid window dimensions: {width}x{height}")
+        return None
+
+    try:
+        # Setup paths
+        extension_path = r"D:\Salon\GG Sea\RektCaptcha_Extension"
+        chrome_exe_path = r"D:\Salon\GG Sea\chrome-win64\chrome.exe"
+        driver_path = get_resource_path("tools/chromedriver.exe", external=True)
+
+        # Create profile path - new profile each run
+        app_data_path = os.getenv("LOCALAPPDATA", Path.home())
+        profile_path = Path(app_data_path) / "TSEO_Profiles" / f"Profile_{thread_name}_{int(time.time())}"
+        profile_path.mkdir(parents=True, exist_ok=True)
+
+        # Setup options
+        options = setup_chrome_options(
+            extension_path=extension_path,
+            chrome_exe_path=chrome_exe_path,
+            headless=headless_mode,
+            window_size=(width, height),
+            window_position=window_position,
+            user_agent=user_agent or DEFAULT_USER_AGENT,
+            profile_path=str(profile_path)
+        )
+
+        # Initialize driver
+        if Path(driver_path).exists():
+            service = Service(executable_path=driver_path)
+            driver = webdriver.Chrome(service=service, options=options)
+        else:
+            driver = webdriver.Chrome(options=options)
+
+        # Set window properties
+        if not headless_mode:
+            try:
+                driver.set_window_rect(x=window_position[0], y=window_position[1], width=width, height=height)
+            except Exception as e:
+                logging.warning(f"Thread {thread_name} - Could not set window rect: {e}")
+                try:
+                    driver.set_window_size(width, height)
+                    driver.set_window_position(*window_position)
+                except Exception as e2:
+                    logging.warning(f"Thread {thread_name} - Could not set window size/position: {e2}")
+
+        # Custom quit method
+        original_quit = driver.quit
+        def custom_quit():
+            logging.info(f"Thread {thread_name} - Closing driver...")
+            try:
+                original_quit()
+            except Exception as e:
+                logging.error(f"Thread {thread_name} - Error during driver quit: {e}")
+        driver.quit = custom_quit
+
+        logging.info(f"Thread {thread_name} - Chrome driver initialized successfully")
+        return driver
+
+    except Exception as e:
+        logging.error(f"Thread {thread_name} - Failed to initialize Chrome driver: {e}")
+        return None
+
 USER_AGENTS = {
     "Windows Chrome": [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
@@ -283,14 +579,15 @@ class SearchThread(QThread):
         except Exception as e:
             self.log(f"⚠ Lỗi khi scroll: {str(e)}")
     
-    def search_keyword(self, keyword, num_results, target_domain=None, thread_index=0):
+    def search_keyword(self, keyword, num_results, target_domain=None, thread_index=0, window_position=None):
         """Tìm kiếm từ khóa - Nhập từ khóa chậm + Tự động giải CAPTCHA"""
         try:
             # Cập nhật thread_index cho instance hiện tại
             self.thread_index = thread_index
-            
+
             results = []
-            self.log(f"🚀 Bắt đầu tìm kiếm từ khóa: '{keyword}'")
+            thread_name = threading.current_thread().name
+            self.log(f"🚀 [{thread_name}] Bắt đầu tìm kiếm từ khóa: '{keyword}'")
 
             # Validate keyword
             if not keyword or not keyword.strip():
@@ -318,6 +615,16 @@ class SearchThread(QThread):
 
             # Setup Chrome options - CHE DẤU AUTOMATION TỐI ĐA
             chrome_options = Options()
+            chrome_options.binary_location = r"D:\Salon\GG Sea\chrome-win64\chrome.exe"
+
+            # Load extension
+            extension_path = r"D:\Salon\GG Sea\RektCaptcha_Extension"
+            if Path(extension_path).exists():
+                chrome_options.add_argument(f"--load-extension={extension_path}")
+                chrome_options.add_argument(f"--disable-extensions-except={extension_path}")
+                self.log(f"✓ Đã load extension: {extension_path}")
+            else:
+                self.log(f"⚠️ Extension không tìm thấy tại: {extension_path}")
 
             # Các tùy chọn cơ bản
             chrome_options.add_argument("--no-sandbox")
@@ -379,79 +686,90 @@ class SearchThread(QThread):
             self.log(f"🔍 Tìm kiếm: {keyword}")
             self.log(f"🌐 Đang mở trình duyệt Chrome...")
 
-            # Khởi tạo driver
+            # Sắp xếp slot trước khi khởi tạo driver để truyền vị trí ngay vào driver
+            with slot_lock:
+                slot_index = None
+                for i, slot in enumerate(window_slots):
+                    if not slot['occupied']:
+                        slot_index = i
+                        break
+
+                if slot_index is None:
+                    slot_index = len(window_slots)
+                    cols = 3
+                    row = slot_index // cols
+                    col = slot_index % cols
+                    spacing = 50
+                    x_pos = col * (window_width + spacing)
+                    y_pos = row * (window_height + spacing + 30)
+
+                    screen_width = 1920
+                    screen_height = 1080
+                    if x_pos + window_width > screen_width:
+                        x_pos = screen_width - window_width - 10
+                    if y_pos + window_height > screen_height:
+                        y_pos = screen_height - window_height - 10
+
+                    window_slots.append({'x': x_pos, 'y': y_pos, 'occupied': True})
+                else:
+                    x_pos = window_slots[slot_index]['x']
+                    y_pos = window_slots[slot_index]['y']
+                    window_slots[slot_index]['occupied'] = True
+
+            # Khởi tạo driver bằng helper create_chrome_driver (từ test.py)
+            driver = None
             try:
-                service = Service(ChromeDriverManager().install())
-                driver = webdriver.Chrome(service=service, options=chrome_options)
-                self.driver = driver  # Gán vào self.driver để có thể dừng được
-                driver.set_page_load_timeout(30)
+                driver = create_chrome_driver(
+                    proxy=self.proxy_dict.get('http') if self.proxy_dict else None,  # Sửa chỗ này
+                    # proxy=self.proxy_dict.get('http') if hasattr(self, 'proxy_dict') else None,
+                    headless_mode=headless,
+                    window_position=(x_pos, y_pos),
+                    user_agent=ua,
+                    width=window_width,
+                    height=window_height,
+                    thread_name=f"search_{self.thread_index}"
+                )
+            except Exception as e:
+                import traceback as _tb
+                self.log(f"⚠ Exception from create_chrome_driver: {e}")
+                self.log('\n'.join(_tb.format_exception_only(type(e), e)))
+                driver = None
 
-                # Set mobile window size
-                driver.set_window_size(window_width, window_height)
-
-                # Sắp xếp cửa sổ Chrome theo slot-based system
-                # Tìm slot trống hoặc tạo slot mới
-                with slot_lock:
-                    # Tìm slot trống đầu tiên
-                    slot_index = None
-                    for i, slot in enumerate(window_slots):
-                        if not slot['occupied']:
-                            slot_index = i
-                            break
-
-                    # Nếu không có slot trống, tạo slot mới
-                    if slot_index is None:
-                        slot_index = len(window_slots)
-                        # Tính toán vị trí dựa trên slot index
-                        cols = 3  # Maximum 3 columns
-                        row = slot_index // cols
-                        col = slot_index % cols
-
-                        # Khoảng cách giữa các cửa sổ
-                        spacing = 50
-                        x_pos = col * (window_width + spacing)
-                        y_pos = row * (window_height + spacing + 30)  # +30 cho title bar
-
-                        # Đảm bảo không tràn màn hình (giả sử màn hình 1920x1080)
-                        screen_width = 1920
-                        screen_height = 1080
-                        if x_pos + window_width > screen_width:
-                            x_pos = screen_width - window_width - 10
-                        if y_pos + window_height > screen_height:
-                            y_pos = screen_height - window_height - 10
-
-                        window_slots.append({'x': x_pos, 'y': y_pos, 'occupied': True})
-                    else:
-                        # Sử dụng slot trống
-                        x_pos = window_slots[slot_index]['x']
-                        y_pos = window_slots[slot_index]['y']
-                        window_slots[slot_index]['occupied'] = True
-
+            # If helper failed, try fallback to webdriver.Chrome with webdriver_manager
+            if not driver:
+                self.log("⚠ create_chrome_driver failed or returned None, attempting fallback with webdriver.Chrome")
+                try:
+                    service = Service(ChromeDriverManager().install())
+                    driver = webdriver.Chrome(service=service, options=chrome_options)
+                    self.driver = driver
                     try:
+                        # try to set position/size
                         driver.set_window_position(x_pos, y_pos)
-                        self.log(f"📍 Đã sắp xếp cửa sổ tại vị trí slot {slot_index} ({x_pos}, {y_pos})")
-                    except Exception as e:
-                        self.log(f"⚠ Không thể sắp xếp vị trí cửa sổ: {str(e)}")
+                        driver.set_window_size(window_width, window_height)
+                    except Exception:
+                        try:
+                            driver.set_window_rect(x=x_pos, y=y_pos, width=window_width, height=window_height)
+                        except Exception:
+                            pass
+                    try:
+                        driver.set_page_load_timeout(30)
+                    except Exception:
+                        pass
+                except Exception as e:
+                    import traceback as _tb
+                    self.log(f"❌ Fallback webdriver.Chrome failed: {e}")
+                    self.log('\n'.join(_tb.format_exception_only(type(e), e)))
+                    return results
 
-                # Log thông tin trình duyệt
-                self.log(f"📊 Thông tin trình duyệt:")
-                self.log(f"   • User-Agent: {ua[:80]}...")
-                self.log(f"   • Window: {window_width}x{window_height}")
-                self.log(f"   • Position: ({x_pos}, {y_pos})")
-                self.log(f"   • Headless: {'✓ Có' if headless else '✗ Không'}")
+            # Small delay before navigation
+            delay_seconds = self.config.get('delay_seconds', 2)
+            if delay_seconds > 0:
+                time.sleep(delay_seconds)
 
-                # Khoản cách trước khi mở trình duyệt
-                delay_seconds = self.config.get('delay_seconds', 2)
-                if delay_seconds > 0:
-                    time.sleep(delay_seconds)
-
-                # XÓA THUỘC TÍNH WEBDRIVER
-                driver.execute_cdp_cmd('Network.setUserAgentOverride', {
-                    "userAgent": ua
-                })
+            # Bổ sung anti-detection scripts via CDP (nếu cần)
+            try:
+                driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent": ua})
                 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-
-                # Thêm script để bypass detection
                 driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
                     'source': '''
                         Object.defineProperty(navigator, 'webdriver', {
@@ -465,10 +783,19 @@ class SearchThread(QThread):
                         });
                     '''
                 })
+            except Exception:
+                # Non-critical if CDP commands fail
+                pass
 
-            except Exception as e:
-                self.log(f"❌ Lỗi khởi tạo ChromeDriver: {str(e)}")
-                return results
+            # Log thông tin trình duyệt
+            try:
+                self.log(f"📊 Thông tin trình duyệt:")
+                self.log(f"   • User-Agent: {ua[:80]}...")
+                self.log(f"   • Window: {window_width}x{window_height}")
+                self.log(f"   • Position: ({x_pos}, {y_pos})")
+                self.log(f"   • Headless: {'✓ Có' if headless else '✗ Không'}")
+            except Exception:
+                pass
 
             # Navigate to Google with retry logic
             self.log("🌐 Đang truy cập Google...")
@@ -500,53 +827,91 @@ class SearchThread(QThread):
                         time.sleep(wait_time)
 
             # Kiểm tra và xử lý CAPTCHA
-            def check_and_solve_captcha():
-                """Kiểm tra và thử giải CAPTCHA tự động"""
+            def check_and_solve_captcha(wait_after_success=True):
+                 # Chờ trang load xong trước khi check
+                time.sleep(2)
+                    
+                try:
+                    current_url = driver.current_url
+                    page_source = driver.page_source.lower()
+                except:
+                    return True  # Driver lỗi thì bỏ qua
+                     
                 if "sorry/index" in driver.current_url or "recaptcha" in driver.page_source.lower():
-                    self.log("⚠️ Phát hiện CAPTCHA!")
+                    self.log("⚠️ Phát hiện CAPTCHA/Checkpoint!")
 
-                    # Thử click vào checkbox reCAPTCHA tự động
-                    try:
-                        self.log("🤖 Đang thử giải CAPTCHA tự động...")
+                    # Chờ extension tự giải trước (RektCaptcha)
+                    self.log("⏳ Chờ extension tự giải (tối đa 30 giây)...")
+                    for i in range(30):
+                        time.sleep(1)
+                        current_url = driver.current_url
+                        page_source = driver.page_source.lower()
 
-                        # Đợi iframe reCAPTCHA load
-                        time.sleep(2)
+                        if "sorry/index" not in current_url and "recaptcha" not in page_source:
+                            self.log(f"✅ Đã vượt qua sau {i+1} giây!")
+                            if wait_after_success:
+                                self.log("⏳ Đợi trang ổn định...")
+                                time.sleep(random.uniform(8, 12))
+                                time.sleep(random.uniform(4, 6))
+                            return True
 
-                        # Tìm iframe reCAPTCHA
-                        iframes = driver.find_elements(By.TAG_NAME, "iframe")
-                        for iframe in iframes:
-                            src = iframe.get_attribute("src")
-                            if "recaptcha" in src:
-                                # Switch to iframe
-                                driver.switch_to.frame(iframe)
+                        if i % 5 == 0:
+                            self.log(f"   ⏳ Đang chờ... ({i+1}/30s)")
 
-                                # Click checkbox
+                        # Thử click checkbox sau 3 giây đầu
+                        # Thử click checkbox sau 3 giây đầu
+                        if i == 3:
+                            try:
+                                # Xóa overlay che khuất trước
+                                driver.execute_script("""
+                                    var overlays = document.querySelectorAll('div[style*="z-index: 2000000000"]');
+                                    overlays.forEach(function(el) { el.remove(); });
+                                """)
+                                time.sleep(0.5)
+
+                                iframes = driver.find_elements(By.TAG_NAME, "iframe")
+                                for iframe in iframes:
+                                    src = iframe.get_attribute("src") or ""
+                                    if "recaptcha" in src:
+                                        driver.switch_to.frame(iframe)
+                                        try:
+                                            checkbox = WebDriverWait(driver, 3).until(
+                                                EC.presence_of_element_located((By.CLASS_NAME, "recaptcha-checkbox-border"))
+                                            )
+                                            driver.execute_script("arguments[0].click();", checkbox)
+                                            self.log("✓ Đã click checkbox reCAPTCHA (JS click)")
+                                        except Exception as e:
+                                            self.log(f"⚠️ Không click được checkbox: {str(e)[:50]}")
+                                        finally:
+                                            driver.switch_to.default_content()
+
+                                        # Check ngay sau khi click
+                                        self.log("⏳ Đang chờ CAPTCHA tự giải sau khi click...")
+                                        for j in range(20):
+                                            time.sleep(1)
+                                            try:
+                                                cur_url = driver.current_url
+                                                cur_src = driver.page_source.lower()
+                                                if "sorry/index" not in cur_url and "recaptcha" not in cur_src:
+                                                    self.log(f"✅ CAPTCHA đã giải xong sau {j+1} giây!")
+                                                    if wait_after_success:
+                                                        self.log("⏳ Đợi trang ổn định...")
+                                                        time.sleep(random.uniform(5, 8))
+                                                    return True
+                                                if j % 5 == 0:
+                                                    self.log(f"   ⏳ Chờ extension xử lý... ({j+1}/20s)")
+                                            except:
+                                                pass
+                                        self.log("⚠️ Extension chưa giải xong, tiếp tục chờ...")
+                                        break
+                            except Exception as e:
+                                self.log(f"⚠️ Lỗi xử lý iframe: {str(e)[:50]}")
                                 try:
-                                    checkbox = WebDriverWait(driver, 5).until(
-                                        EC.element_to_be_clickable((By.CLASS_NAME, "recaptcha-checkbox-border"))
-                                    )
-                                    checkbox.click()
-                                    self.log("✓ Đã click vào checkbox reCAPTCHA")
-                                    time.sleep(3)
-
-                                    # Switch back
                                     driver.switch_to.default_content()
-
-                                    # Chờ xem CAPTCHA có tự giải không
-                                    time.sleep(2)
-                                    if "sorry/index" not in driver.current_url:
-                                        self.log("✅ CAPTCHA đã được giải tự động!")
-                                        return True
-
                                 except:
-                                    driver.switch_to.default_content()
-                                break
+                                    pass
 
-                    except Exception as e:
-                        self.log(f"⚠️ Không thể giải tự động: {str(e)}")
-
-                    # Nếu không giải được tự động, dừng tìm kiếm từ khóa này
-                    self.log("❌ CAPTCHA không thể giải tự động, dừng tìm kiếm từ khóa này")
+                    self.log("❌ Hết 30 giây, không vượt qua được CAPTCHA")
                     return False
                 return True
 
@@ -1112,20 +1477,17 @@ class SearchThread(QThread):
             worksheet_initialized = False
 
             # Sử dụng ThreadPoolExecutor để chạy đa luồng
-            max_workers = min(len(keywords), self.config.get('max_threads', 5))  # Sử dụng cấu hình max_threads
+            max_workers = min(len(keywords), self.config.get('max_threads', 5))
+            if max_workers < 1:
+                max_workers = 1
+            self.log(f"🧵 max_workers = {max_workers}, len(keywords) = {len(keywords)}")
             self.log(f"🧵 Sử dụng {max_workers} thread để xử lý")
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                # Submit các task tìm kiếm với delay giữa các Chrome instance
+                # Submit các task tìm kiếm
                 future_to_keyword = {}
-                delay_between_instances = self.config.get('delay_seconds', 2)
 
                 for i, keyword in enumerate(keywords):
-                    # Thêm delay giữa các Chrome instance (trừ instance đầu tiên)
-                    if i > 0 and delay_between_instances > 0:
-                        self.log(f"⏳ Đợi {delay_between_instances} giây trước khi mở Chrome instance tiếp theo...")
-                        time.sleep(delay_between_instances)
-
                     # Tính thread_index để lấy proxy tương ứng (chia vòng nếu nhiều keyword hơn proxy)
                     thread_index = i % max_workers
                     future_to_keyword[executor.submit(self.search_keyword, keyword, num_results, target_domain, thread_index)] = keyword
@@ -1941,13 +2303,13 @@ class KeywordSearchGUI(QMainWindow):
 
         self.delay_input = QSpinBox()
         self.delay_input.setMinimum(0)
-        self.delay_input.setMaximum(10)
+        self.delay_input.setMaximum(20)
         self.delay_input.setValue(2)
         self.delay_input.setMinimumHeight(30)
         self.delay_input.setMaximumWidth(80)
         delay_layout.addWidget(self.delay_input)
 
-        delay_desc_label = QLabel("(0 = không delay, 1-10 giây)")
+        delay_desc_label = QLabel("(0 = không delay, 1-20 giây)")
         delay_desc_label.setFont(QFont('Arial', 8))
         delay_desc_label.setStyleSheet("color: #666;")
         delay_layout.addWidget(delay_desc_label)
