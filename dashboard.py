@@ -490,7 +490,7 @@ st.markdown(f"""
 
 # Dashboard Title with Emoji
 st.markdown("""
-    <div style='text-align: left; margin: 0; padding: 0;'>
+    <div style='text-align: left; margin: 0; padding: 0; transform: translateY(-70px); z-index: 999; position: relative;'>
         <h1 style='font-size: 2.5rem; font-weight: 800; margin: 0; padding: 0;'>SEO Rank</h1>
         <p style='font-size: 1rem; opacity: 0.7; margin: 0; padding: 0;'>Phân tích SEO toàn diện với AI Insights & Forecasting</p>
     </div>
@@ -704,10 +704,9 @@ st.sidebar.markdown("""
     <style>
         [data-testid="stSidebar"] > div:first-child {{
             padding-top: 0rem !important;
-            margin-top: -1rem !important;
         }}
     </style>
-    <div style='display: flex; justify-content: center;'>
+    <div style='display: flex; justify-content: center; transform: translateY(-40px);'>
         <img src='data:image/png;base64,{}' width='180'>
     </div>
 """.format(__import__('base64').b64encode(open('logo.png', 'rb').read()).decode()),
