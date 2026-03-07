@@ -490,9 +490,9 @@ st.markdown(f"""
 
 # Dashboard Title with Emoji
 st.markdown("""
-    <div style='text-align: center; margin-bottom: 1.5rem;'>
-        <h1 style='font-size: 2.5rem; font-weight: 800; margin: 0;'>SEO Rank</h1>
-        <p style='font-size: 1rem; opacity: 0.7; margin-top: 0.5rem;'>Phân tích SEO toàn diện với AI Insights & Forecasting</p>
+    <div style='text-align: left; margin: 0; padding: 0;'>
+        <h1 style='font-size: 2.5rem; font-weight: 800; margin: 0; padding: 0;'>SEO Rank</h1>
+        <p style='font-size: 1rem; opacity: 0.7; margin: 0; padding: 0;'>Phân tích SEO toàn diện với AI Insights & Forecasting</p>
     </div>
 """, unsafe_allow_html=True)
 
@@ -700,8 +700,19 @@ def create_heatmap_calendar(df, year, month):
     return cal, daily_scores
 
 # ===================== SIDEBAR =====================
-# (Settings expander removed per user request)
-
+st.sidebar.markdown("""
+    <style>
+        [data-testid="stSidebar"] > div:first-child {{
+            padding-top: 0rem !important;
+            margin-top: -1rem !important;
+        }}
+    </style>
+    <div style='display: flex; justify-content: center;'>
+        <img src='data:image/png;base64,{}' width='180'>
+    </div>
+""".format(__import__('base64').b64encode(open('logo.png', 'rb').read()).decode()),
+    unsafe_allow_html=True
+)
 # Domain selector
 st.sidebar.markdown("**🌐 Domain**")
 domains = list(SHEETS.keys())
@@ -2727,7 +2738,8 @@ try:
     
     # Chỉ giữ lại các cột tồn tại và theo thứ tự mong muốn
     display_columns = [col for col in column_order if col in filtered.columns]
-    filtered_display = filtered[display_columns]
+    filtered_display = filtered[display_columns].copy()
+    filtered_display.index = range(1, len(filtered_display) + 1)  # Bắt đầu từ 1
     
     st.dataframe(
         filtered_display.drop(columns=["Ngày_Sort"], errors="ignore"),

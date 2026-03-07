@@ -541,8 +541,8 @@ class SearchThread(QThread):
             scroll_duration = random.randint(800, 1500)  # 0.8-1.5 giây mỗi lần scroll
 
             while current_scroll < scroll_height * 0.8 and self.is_running:  # Scroll đến 80% chiều cao
-                # Smooth scroll
-                driver.execute_script(f"window.smoothScroll({scroll_distance}, {scroll_duration});")
+                # Smooth scroll - inject function first then execute
+                self.inject_smooth_scroll_and_execute(driver, scroll_distance, scroll_duration)
                 current_scroll += scroll_distance
 
                 # Đợi smooth scroll hoàn thành + pause ngẫu nhiên như người đọc
