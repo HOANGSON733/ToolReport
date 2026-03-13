@@ -491,11 +491,17 @@ st.markdown(f"""
 # Dashboard Title with Emoji
 st.markdown("""
     <style>
+        /* Ẩn padding top mặc định của Streamlit */
         .block-container {
-            padding-top: 4rem !important;
+            padding-top: 0.5rem !important;
+        }
+        /* Ẩn header Streamlit mặc định nếu muốn */
+        [data-testid="stHeader"] {
+            height: 0rem;
+            visibility: hidden;
         }
     </style>
-    <div style='text-align: left; margin: 0; padding: 0;'>
+    <div style='text-align: left; margin: 0; padding: 0.5rem 0 1rem 0;'>
         <h1 style='font-size: 2.5rem; font-weight: 800; margin: 0; padding: 0;'>SEO Rank</h1>
         <p style='font-size: 1rem; opacity: 0.7; margin: 0; padding: 0;'>Phân tích SEO toàn diện với AI Insights & Forecasting</p>
     </div>
