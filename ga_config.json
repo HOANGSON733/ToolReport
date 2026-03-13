@@ -1,0 +1,18 @@
+{
+  "websites": {
+    "Website 1 - huyenhocviet.com": {
+      "property_id": "464855282",
+      "name": "huyenhocviet.com"
+    },
+    "Website 2 - drtuananh.com": {
+      "property_id": "517078868",
+      "name": "drtuananh.com"
+    },
+    "Website 3 - sdtc.com": {
+      "property_id": "517020245",
+      "name": "sdtc.com"
+    }
+  },
+  "service_account_email": "sheets-access@silken-math-476408-n8.iam.gserviceaccount.com"
+}
+

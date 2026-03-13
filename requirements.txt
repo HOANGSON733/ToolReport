@@ -9,3 +9,5 @@ google-auth-httplib2
 google-analytics-data
 scikit-learn
 selenium
+webdriver-manager>=4.0.2
+

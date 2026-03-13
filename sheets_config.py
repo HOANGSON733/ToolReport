@@ -14,3 +14,11 @@ SHEETS = {
         "worksheet": "Ngày_22_01_2026"
     }
 }
+
+# === HƯỚNG DẪN THÊM DOMAIN MỚI ===
+# Copy và paste theo cấu trúc sau:
+#
+# "ten_domain_moi.com": {
+#     "sheet_id": "ID_CUA_GOOGLE_SHEETS",
+#     "worksheet": "Ten_worksheet_mac_dinh"
+# }

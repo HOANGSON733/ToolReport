@@ -493,12 +493,7 @@ st.markdown("""
     <style>
         /* Ẩn padding top mặc định của Streamlit */
         .block-container {
-            padding-top: 0.5rem !important;
-        }
-        /* Ẩn header Streamlit mặc định nếu muốn */
-        [data-testid="stHeader"] {
-            height: 0rem;
-            visibility: hidden;
+            padding-top: 4rem !important;
         }
     </style>
     <div style='text-align: left; margin: 0; padding: 0.5rem 0 1rem 0;'>
@@ -2100,31 +2095,47 @@ try:
     elif analysis_mode == "Google Analytics":
         st.markdown('<p class="section-header">📊 Google Analytics</p>', unsafe_allow_html=True)
 
-        # Google Analytics config - Multiple websites
-        # Try to load GA credentials from Streamlit secrets first (for Streamlit Cloud)
-        # Otherwise fall back to local credentials.json file
+        # Load GA configuration from file
+        ga_config = {}
         try:
-            if "gcp_service_account" in st.secrets:
-                ga_creds_dict = st.secrets["gcp_service_account"]
-                credentials = service_account.Credentials.from_service_account_info(
-                    ga_creds_dict,
-                    scopes=["https://www.googleapis.com/auth/analytics.readonly"]
-                )
+            if os.path.exists('ga_config.json'):
+                with open('ga_config.json', 'r') as f:
+                    ga_config = json.load(f)
+                WEBSITES = {k: v['property_id'] for k, v in ga_config.get('websites', {}).items()}
+                service_account_email = ga_config.get('service_account_email', 'sheets-access@silken-math-476408-n8.iam.gserviceaccount.com')
             else:
-                credentials = service_account.Credentials.from_service_account_file(
-                    "credentials.json",
-                    scopes=["https://www.googleapis.com/auth/analytics.readonly"]
-                )
+                # Fallback to hardcoded values if config file doesn't exist
+                WEBSITES = {
+                    "Website 1 - huyenhocviet.com": "464855282",
+                    "Website 2 - drtuananh.com": "517078868",
+                    "Website 3 - sdtc.com": "517020245",
+                }
+                service_account_email = "sheets-access@silken-math-476408-n8.iam.gserviceaccount.com"
         except Exception as e:
-            st.error(f"❌ Không thể tải Google Analytics credentials: {e}")
-            st.info("💡 Để sử dụng Streamlit Cloud, thêm [gcp_service_account] vào Secrets")
-            st.stop()
-        
-        WEBSITES = {
-            "Website 1 - huyenhocviet.com": "464855282",
-            "Website 2 - drtuananh.com": "517078868",
-            "Website 3 - sdtc.com": "517020245",
-        }
+            st.warning(f"⚠️ Không thể tải cấu hình GA: {e}")
+            WEBSITES = {
+                "Website 1 - huyenhocviet.com": "464855282",
+                "Website 2 - drtuananh.com": "517078868",
+                "Website 3 - sdtc.com": "517020245",
+            }
+            service_account_email = "sheets-access@silken-math-476408-n8.iam.gserviceaccount.com"
+
+        # Show service account info for troubleshooting
+        with st.expander("ℹ️ Thông tin Service Account (để thêm quyền truy cập)"):
+            st.markdown(f"""
+            **Email Service Account cần được thêm vào GA4:**
+            ```
+            {service_account_email}
+            ```
+            
+            **Cách thêm quyền:**
+            1. Truy cập [Google Analytics](https://analytics.google.com/)
+            2. Chọn property GA4 cần truy cập
+            3. Vào **Admin** → **Property Access Management**
+            4. Thêm email ở trên với quyền **Viewer**
+            
+            **Lưu ý:** Property ID trong cấu hình cần là GA4 Property ID (không phải Universal Analytics)
+            """)
 
         # Website selector with multi-comparison option
         st.markdown("**🌐 Chọn website để phân tích**")
@@ -2348,7 +2359,7 @@ try:
                     daily_sessions = daily_sessions.sort_values('Ngày')
                     fig2 = px.bar(daily_sessions, x='Ngày', y='Phiên', color='Phiên', color_continuous_scale='Viridis')
                     fig2.update_layout(height=350, hovermode='x unified', plot_bgcolor='rgba(0,0,0,0)', showlegend=False)
-                    st.plotly_chart(fig2, use_container_width=True)
+                    st.plotly_chart(fig2, width='stretch')
 
                 # Source breakdown
                 col_c, col_d = st.columns(2)
@@ -2358,14 +2369,14 @@ try:
                     source_data = ga_df.groupby('Nguồn')['Phiên'].sum().nlargest(8).reset_index()
                     fig3 = px.bar(source_data, x='Phiên', y='Nguồn', orientation='h', color='Phiên', color_continuous_scale='Blues')
                     fig3.update_layout(height=350, showlegend=False, plot_bgcolor='rgba(0,0,0,0)')
-                    st.plotly_chart(fig3, use_container_width=True)
+                    st.plotly_chart(fig3, width='stretch')
                 
                 with col_d:
                     st.subheader("📋 Top Quốc gia")
                     country_data = ga_df.groupby('Quốc gia')['Người dùng'].sum().nlargest(10).reset_index()
                     fig4 = px.bar(country_data, x='Người dùng', y='Quốc gia', orientation='h', color='Người dùng', color_continuous_scale='Greens')
                     fig4.update_layout(height=350, showlegend=False, plot_bgcolor='rgba(0,0,0,0)')
-                    st.plotly_chart(fig4, use_container_width=True)
+                    st.plotly_chart(fig4, width='stretch')
 
             with tab2:
                 st.subheader("🌍 Phân tích theo Quốc gia")
@@ -2381,10 +2392,10 @@ try:
                 with col_x:
                     fig_country = px.pie(country_detail.head(10), values='Người dùng', names='Quốc gia', hole=0.4)
                     fig_country.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20))
-                    st.plotly_chart(fig_country, use_container_width=True)
+                    st.plotly_chart(fig_country, width='stretch')
                 
                 with col_y:
-                    st.dataframe(country_detail[['Quốc gia', 'Người dùng', 'Phiên', 'Lượt xem']].head(15), use_container_width=True)
+                    st.dataframe(country_detail[['Quốc gia', 'Người dùng', 'Phiên', 'Lượt xem']].head(15), width='stretch')
 
                 with tab4:
                     st.subheader("📱 Phân tích theo Thiết bị")
@@ -2400,10 +2411,10 @@ try:
                     with col_m:
                         fig_device = px.pie(device_detail, values='Người dùng', names='Thiết bị', hole=0.4, color_discrete_sequence=px.colors.qualitative.Set2)
                         fig_device.update_layout(height=400, margin=dict(l=20, r=20, t=20, b=20))
-                        st.plotly_chart(fig_device, use_container_width=True)
+                        st.plotly_chart(fig_device, width='stretch')
                     
                     with col_n:
-                        st.dataframe(device_detail[['Thiết bị', 'Người dùng', 'Phiên', 'Tỷ lệ thoát']], use_container_width=True)
+                        st.dataframe(device_detail[['Thiết bị', 'Người dùng', 'Phiên', 'Tỷ lệ thoát']], width='stretch')
 
                 with tab3:
                     st.subheader("🏙️ Phân tích theo Thành phố")
@@ -2429,14 +2440,14 @@ try:
                             fig_city.update_traces(textposition='outside')
                             fig_city.update_layout(height=400, showlegend=False, plot_bgcolor='rgba(0,0,0,0)', 
                                                  yaxis={'categoryorder':'total ascending'})
-                            st.plotly_chart(fig_city, use_container_width=True)
+                            st.plotly_chart(fig_city, width='stretch')
                     
                     with col_city2:
                         st.markdown("#### 📊 Chi tiết Top thành phố")
                         if not city_detail.empty:
                             display_cities = city_detail.head(15)[['Quốc gia', 'Thành phố', 'Người dùng', 'Phiên', 'Lượt xem']].copy()
                             display_cities.columns = ['Quốc gia', 'Thành phố', 'Người dùng', 'Phiên', 'Lượt xem']
-                            st.dataframe(display_cities, use_container_width=True, hide_index=True)
+                            st.dataframe(display_cities, width='stretch', hide_index=True)
                     
                     # Vị trí chi tiết theo quốc gia
                     st.markdown("---")
@@ -2456,7 +2467,7 @@ try:
                         
                         if not country_cities.empty:
                             st.markdown(f"**{selected_country_detail}** - Tổng {len(country_cities)} thành phố")
-                            st.dataframe(country_cities, use_container_width=True, hide_index=True)
+                            st.dataframe(country_cities, width='stretch', hide_index=True)
                         else:
                             st.info(f"Không có dữ liệu chi tiết thành phố cho {selected_country_detail}")
                     
@@ -2498,7 +2509,7 @@ try:
                             margin=dict(l=20, r=20, t=20, b=20)
                         )
                         
-                        st.plotly_chart(fig_city_trend, use_container_width=True)
+                        st.plotly_chart(fig_city_trend, width='stretch')
 
                 with tab5:
                     st.subheader("🔥 Top trang phổ biến")
@@ -2556,10 +2567,10 @@ try:
                         data=csv_data,
                         file_name=f"ga_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv",
-                        use_container_width=True
+                        width='stretch'
                     )
                     
-                    st.dataframe(filtered_ga.sort_values('Ngày', ascending=False), use_container_width=True, height=500)
+                    st.dataframe(filtered_ga.sort_values('Ngày', ascending=False), width='stretch', height=500)
 
                 # Comparison Tab
                 if tab7 is not None:
@@ -2599,7 +2610,7 @@ try:
                             
                             if comparison_metrics:
                                 comparison_df = pd.DataFrame(comparison_metrics)
-                                st.dataframe(comparison_df, use_container_width=True, hide_index=True)
+                                st.dataframe(comparison_df, width='stretch', hide_index=True)
                             
                             st.divider()
                             
@@ -2652,7 +2663,7 @@ try:
                                         margin=dict(l=50, r=20, t=40, b=50),
                                         legend=dict(x=0.5, y=-0.2, xanchor='center', yanchor='top', orientation='h')
                                     )
-                                    st.plotly_chart(fig_users, use_container_width=True)
+                                    st.plotly_chart(fig_users, width='stretch')
                             
                             # Comparison charts - Phiên theo ngày
                             with col_chart2:
@@ -2698,7 +2709,7 @@ try:
                                         margin=dict(l=50, r=20, t=40, b=50),
                                         legend=dict(x=0.5, y=-0.2, xanchor='center', yanchor='top', orientation='h')
                                     )
-                                    st.plotly_chart(fig_sessions, use_container_width=True)
+                                    st.plotly_chart(fig_sessions, width='stretch')
                             
                             st.divider()
                             
@@ -2726,7 +2737,7 @@ try:
                                             color_continuous_scale='Blues'
                                         )
                                         fig_src.update_layout(height=300, showlegend=False, plot_bgcolor='rgba(0,0,0,0)')
-                                        st.plotly_chart(fig_src, use_container_width=True)
+                                        st.plotly_chart(fig_src, width='stretch')
                         else:
                             st.error(f"❌ Không thể tải dữ liệu từ các website so sánh")
 

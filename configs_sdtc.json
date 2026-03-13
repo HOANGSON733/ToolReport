@@ -3,8 +3,8 @@
     "sheet_id": "1EIHXRlUZFYvxmXDd31Dn5jcQ0QzwH6sGTllGfuRNX3s",
     "num_pages": 13,
     "target_domain": "https://sdtc.vn/",
-    "max_threads": 2,
-    "keywords": "An toàn dữ liệu web \nWebsite đa nền tảng\nBackup website tự động\nHosting SSD cao tốc \nWeb accessibility\nSEO nội dung trang chủ\nXu hướng thiết kế website 2026\nGiao diện website đẹp\nThiết kế website doanh nghiệp\nTemplate website\nCấu trúc website\nTối ưu website",
+    "max_threads": 5,
+    "keywords": "CDN Website\nBảo trì website định kỳ\nwebsite đạt chuẩn Google Mobile First\nChatbot AI\nTối ưu hình ảnh web\nTương lai website AI\nSEO hình ảnh\nCông nghệ Cloud Hosting\nWeb security trends 2026\nXu hướng công nghệ web 2026\nKiểm tra tốc độ website\nChuyển đổi HTTPS\nAn toàn dữ liệu web \nWebsite đa nền tảng\nBackup website tự động\nHosting SSD cao tốc \nWeb accessibility\nSEO nội dung trang chủ\nXu hướng thiết kế website 2026\nGiao diện website đẹp\nThiết kế website doanh nghiệp\nTemplate website\nCấu trúc website\nTối ưu website",
     "credentials_file": "credentials.json",
     "ua_category": "Windows Chrome",
     "ua_specific": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
@@ -12,13 +12,18 @@
     "window_height": 667,
     "headless": false,
     "delay_seconds": 2,
-    "timestamp": "2026-01-29T10:35:32.542208"
+    "proxy_enabled": false,
+    "proxy_type": "http",
+    "proxy_list": [
+      "14.224.225.129:45008:aHCtaC:stSDcl"
+    ],
+    "timestamp": "2026-03-04T16:39:37.475020"
   },
   "Huyenhocviet": {
     "sheet_id": "1cuj6slTO1wroK2OkBvd1HdyD_WKXTRmqqoC0bCEmKJE",
     "num_pages": 13,
     "target_domain": "https://huyenhocviet.com/",
-    "max_threads": 2,
+    "max_threads": 5,
     "keywords": "Linh phù phong thủy\nNăng Lượng Con Số\nNăng Lượng Con Số\nHướng Nhà Phong Thủy Tả Ao\nQuẻ bói và hào động\nTrạch Vận Tân Án\nSa Hình Phong Thủy Tả Ao\nBát sát trong âm trạch\nDịch Việt Chánh Tông\nSa Hình Phong Thủy Tả Ao\nỨng dụng cảm xạ học\nBốc phệ trong mệnh lý \nHuyền Cơ Tham Bí\nDự đoán thời vận đại độn\nTăng bổ bốc phệ là gì\nSa Hình Phong Thủy Tả Ao\nĐiểm Huyệt Phong Thủy\nlinh số cá nhân theo bát cực\nHuyền Không Đại Quái\nĐiểm Huyệt Phong Thủy\nPhong Thủy Nhà Ở Tả Ao\nBốc phệ và đạo thuận thiên  ",
     "credentials_file": "credentials.json",
     "ua_category": "Windows Chrome",
@@ -27,13 +32,18 @@
     "window_height": 667,
     "headless": false,
     "delay_seconds": 2,
-    "timestamp": "2026-01-29T10:39:21.776289"
+    "proxy_enabled": false,
+    "proxy_type": "http",
+    "proxy_list": [
+      "14.224.225.129:45008:aHCtaC:stSDcl"
+    ],
+    "timestamp": "2026-03-09T11:47:16.879115"
   },
   "Dr": {
     "sheet_id": "1gIIXt6fC9lXR2vRhnrLJxBoIT2pIvgNfPP8Ct96_D6k",
     "num_pages": 13,
     "target_domain": "https://drtuananh.com/",
-    "max_threads": 2,
+    "max_threads": 5,
     "keywords": "Cách lựa size túi ngực\nBầm tím sau hút mỡ\nHút mỡ cánh tay\nNâng mũi sụn 3D\nNâng mũi 3D Fitme\nBóng tập cơ hàm\nCách chăm sóc sau phẫu\nMũi hếch sau nâng mũi\nNẹp mũi sau phẫu\nTreo sa kẹo mút\nBody S-line không cần tập gym\nKinh nghiệm trượt hàm\ncăng da mặt phổ biến nhất 2025\nchi phí gọt hàm 2025\ngọt hàm vuông mới nhất năm 2025\ntrẻ hóa vùng kín mới nhất 2025\nchi phí gọt hàm trong nước và ngoài nước\nSo sánh chi phí gọt hàm trong nước\nkinh nghiệm thực tế trượt hàm móm\nNên gọt hàm thời điểm nào\ntạo hình cơ bụng 60 phút\nkinh nghiệm thực tế gọt hàm a-z\nsai lầm khi chăm sóc sau nâng mũi\nquy trình gọt hàm thực tế a - z\nFAQ tạo hình cơ bụng\nphụ nữ dễ bị to quầng ti sau sinh\n3 phương pháp thu nhỏ quầng ti phổ biến hiện nay\ntạo hình cơ bụng thay tập gym\nhút mỡ tạo cơ 4D với hút mỡ truyền thống\nTạo hình cơ bụng cho nam và nữ\nchỉnh sửa vóc dáng trước ngày cưới\nKhi nào nên gọt hàm để ít rủi ro\nlý do phụ nữ lựa chọn hút mỡ đùi sau sinh\nKinh nghiệm trượt hàm\ntrải nghiệm gọt hàm\nKinh nghiệm trượt hàm\nphụ nữ dễ bị to quầng ti sau sinh\nKhi nào nên gọt hàm để ít rủi ro\nchi phí gọt hàm 2025\nNên gọt hàm thời điểm nào\nTiêu chí chọn địa chỉ hút mỡ tốt\nBác sĩ Nguyễn Tuấn Anh hút mỡ\nThẩm mỹ viện Nguyễn Tuấn Anh\nBác sĩ Nguyễn Tuấn Anh nâng mũi\nThẩm mỹ viện Nguyễn Tuấn Anh\nBác sĩ Nguyễn Tuấn Anh nâng ngực\nThẩm mỹ viện Nguyễn Tuấn Anh\nBác sĩ Nguyễn Tuấn Anh nâng mông\nThẩm mỹ viện Nguyễn Tuấn Anh\nBệnh viện thẩm mỹ Nguyễn Tuấn Anh\nReview bác sĩ Nguyễn Tuấn Anh hút mỡ\nBảng giá thẩm mỹ viện Nguyễn Tuấn Anh\nLịch làm việc thẩm mỹ viện Nguyễn Tuấn Anh\nĐánh giá khách hàng thẩm mỹ viện Nguyễn Tuấn Anh\nCơ sở vật chất thẩm mỹ viện Nguyễn Tuấn Anh",
     "credentials_file": "credentials.json",
     "ua_category": "Windows Chrome",
@@ -41,12 +51,12 @@
     "window_width": 375,
     "window_height": 667,
     "headless": false,
-    "delay_seconds": 2,
+    "delay_seconds": 7,
     "proxy_enabled": true,
     "proxy_type": "http",
     "proxy_list": [
       "14.224.225.129:45008:aHCtaC:stSDcl"
     ],
-    "timestamp": "2026-02-02T14:14:44.374439"
+    "timestamp": "2026-03-13T10:26:09.859922"
   }
 }
