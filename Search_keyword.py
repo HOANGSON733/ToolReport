@@ -38,12 +38,10 @@ import uuid
 from pathlib import Path
 
 # Global variables for slot-based window positioning
-window_slots = []  # List of dicts: {'x': int, 'y': int, 'occupied': bool}
-slot_lock = threading.Lock()  # Thread-safe access to slots
-
-# Global variables for slot-based window positioning
-window_slots = []  # List of dicts: {'x': int, 'y': int, 'occupied': bool}
-slot_lock = threading.Lock()  # Thread-safe access to slots
+window_slots = []
+slot_lock = threading.Lock()
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1040  # Trừ taskbar ~40px
 
 # Constants
 DEFAULT_WINDOW_SIZE = (600, 800)
@@ -53,7 +51,46 @@ DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
 # Constants
 DEFAULT_WINDOW_SIZE = (600, 800)
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+def get_window_slot(window_width, window_height, max_cols=3):
+    """Lấy slot trống và tính toán vị trí cửa sổ Chrome"""
+    with slot_lock:
+        spacing_x = 10
+        spacing_y = 10
+        
+        # Tính số cột/hàng có thể fit trên màn hình
+        cols = min(max_cols, max(1, SCREEN_WIDTH // (window_width + spacing_x)))
+        
+        # Tìm slot trống
+        for i, slot in enumerate(window_slots):
+            if not slot['occupied']:
+                window_slots[i]['occupied'] = True
+                return i, slot['x'], slot['y']
+        
+        # Tạo slot mới
+        slot_index = len(window_slots)
+        row = slot_index // cols
+        col = slot_index % cols
+        
+        x = col * (window_width + spacing_x)
+        y = row * (window_height + spacing_y)
+        
+        # Clamp vào màn hình
+        x = min(x, SCREEN_WIDTH - window_width)
+        y = min(y, SCREEN_HEIGHT - window_height)
+        x = max(0, x)
+        y = max(0, y)
+        
+        window_slots.append({'x': x, 'y': y, 'occupied': True})
+        return slot_index, x, y
 
+
+def release_window_slot(slot_index):
+    """Giải phóng slot khi Chrome đóng"""
+    with slot_lock:
+        if slot_index is not None and slot_index < len(window_slots):
+            window_slots[slot_index]['occupied'] = False
+            
+# Optional: Xóa slot nếu nó ở cuối danh sách để tránh tích tụ slot rỗng
 def get_resource_path(relative_path: str, external: bool = False) -> str:
     """Get the absolute path to a resource, handling both development and packaged environments."""
     if getattr(sys, "frozen", False):
@@ -393,7 +430,7 @@ class SearchThread(QThread):
             };
             """
             driver.execute_script(smooth_scroll_script)
-
+            time.sleep(1)  # Đợi script được inject
             # Lấy chiều cao trang
             scroll_height = driver.execute_script("return document.body.scrollHeight")
             current_scroll = 0
@@ -444,6 +481,7 @@ class SearchThread(QThread):
     
     def search_keyword(self, keyword, num_results, target_domain=None, thread_index=0, window_position=None):
         """Tìm kiếm từ khóa - Nhập từ khóa chậm + Tự động giải CAPTCHA"""
+        results = []
         try:
             # Cập nhật thread_index cho instance hiện tại
             self.thread_index = thread_index
@@ -550,34 +588,9 @@ class SearchThread(QThread):
             self.log(f"🌐 Đang mở trình duyệt Chrome...")
 
             # Sắp xếp slot trước khi khởi tạo driver để truyền vị trí ngay vào driver
-            with slot_lock:
-                slot_index = None
-                for i, slot in enumerate(window_slots):
-                    if not slot['occupied']:
-                        slot_index = i
-                        break
-
-                if slot_index is None:
-                    slot_index = len(window_slots)
-                    cols = 3
-                    row = slot_index // cols
-                    col = slot_index % cols
-                    spacing = 50
-                    x_pos = col * (window_width + spacing)
-                    y_pos = row * (window_height + spacing + 30)
-
-                    screen_width = 1920
-                    screen_height = 1080
-                    if x_pos + window_width > screen_width:
-                        x_pos = screen_width - window_width - 10
-                    if y_pos + window_height > screen_height:
-                        y_pos = screen_height - window_height - 10
-
-                    window_slots.append({'x': x_pos, 'y': y_pos, 'occupied': True})
-                else:
-                    x_pos = window_slots[slot_index]['x']
-                    y_pos = window_slots[slot_index]['y']
-                    window_slots[slot_index]['occupied'] = True
+                        # Lấy slot và vị trí cửa sổ
+            slot_index, x_pos, y_pos = get_window_slot(window_width, window_height)
+            self.log(f"📐 Slot #{slot_index} → vị trí ({x_pos}, {y_pos})")
 
             # Khởi tạo driver bằng helper create_chrome_driver (từ test.py)
             driver = None
@@ -625,9 +638,9 @@ class SearchThread(QThread):
                     return results
 
             # Small delay before navigation
-            delay_seconds = self.config.get('delay_seconds', 2)
-            if delay_seconds > 0:
-                time.sleep(delay_seconds)
+            # delay_seconds = self.config.get('delay_seconds', 2)
+            # if delay_seconds > 0:
+            #     time.sleep(delay_seconds)
 
             # Bổ sung anti-detection scripts via CDP (nếu cần)
             try:
@@ -1135,10 +1148,9 @@ class SearchThread(QThread):
                     self.driver = None
                 except:
                     self.driver = None
-                    pass
-
+            # Giải phóng slot để tái sử dụng
+            release_window_slot(slot_index if 'slot_index' in locals() else None)
         return results
-
     def write_to_sheet(self, sheet_id, results):
         """Ghi kết quả lên Google Sheets"""
         try:
@@ -1308,10 +1320,15 @@ class SearchThread(QThread):
                 future_to_keyword = {}
 
                 for i, keyword in enumerate(keywords):
-                    # Tính thread_index để lấy proxy tương ứng (chia vòng nếu nhiều keyword hơn proxy)
                     thread_index = i % max_workers
                     future_to_keyword[executor.submit(self.search_keyword, keyword, num_results, target_domain, thread_index)] = keyword
-
+                    
+                    # Stagger: đợi delay_seconds trước khi mở Chrome tiếp theo
+                    if i < len(keywords) - 1:  # Không delay sau keyword cuối
+                        delay_seconds = self.config.get('delay_seconds', 2)
+                        if delay_seconds > 0:
+                            self.log(f"⏳ Đợi {delay_seconds}s trước khi mở Chrome tiếp theo...")
+                            time.sleep(delay_seconds)
                 # Thu thập kết quả từ các thread
                 completed_keywords = 0  # ← THÊM DÒNG NÀY
                 for future in concurrent.futures.as_completed(future_to_keyword):
@@ -1322,7 +1339,7 @@ class SearchThread(QThread):
 
                     keyword = future_to_keyword[future]
                     try:
-                        results = future.result()
+                        results = future.result() or []
                         self.log(f"✓ Tìm thấy {len(results)} kết quả cho '{keyword}'")
                         
                         # Ghi kết quả lên Google Sheet ngay sau khi tìm xong từ khóa
